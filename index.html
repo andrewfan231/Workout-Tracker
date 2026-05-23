@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Overload Fitness Tracker</title>
+    <link rel="stylesheet" href="styles.css?v=app-polish-16" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <nav class="game-nav" aria-label="App pages">
+        <a class="nav-link active" href="index.html">Home</a>
+        <a class="nav-link" href="workout.html">Workout</a>
+        <a class="nav-link" href="goals.html">Set Goals</a>
+        <a class="nav-link" href="shop.html">Shop</a>
+        <a class="nav-link" href="progression.html">Progression</a>
+      </nav>
+
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Training arcade</p>
+          <h1>Level up your training.</h1>
+        </div>
+        <div class="scoreboard" aria-label="Training summary">
+          <div class="streak-card">
+            <span class="flame" aria-hidden="true">🔥</span>
+            <span id="streakCount">0</span>
+            <small>day streak</small>
+          </div>
+          <div>
+            <span id="totalWorkouts">0</span>
+            <small>days logged</small>
+          </div>
+          <div>
+            <span id="totalVolume">0</span>
+            <small>total volume</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="xp-panel" aria-label="Training XP">
+        <div>
+          <p class="eyebrow">Player progress</p>
+          <h2 id="xpText">Level 1 · 0 XP</h2>
+        </div>
+        <div class="xp-track" aria-hidden="true">
+          <div id="xpFill" class="xp-fill"></div>
+        </div>
+      </section>
+
+      <section id="starterPath" class="panel starter-path-panel" aria-label="Starter path"></section>
+
+      <section class="panel goal-reminder-panel" aria-label="Saved goals">
+        <div class="panel-header simple">
+          <h2>Goal Reminder</h2>
+          <span>what you chose</span>
+        </div>
+        <div id="homeGoalReminder" class="goal-reminder-list"></div>
+      </section>
+
+      <section class="panel coach-panel" aria-label="Coach insight">
+        <div class="panel-header simple">
+          <h2>Coach Insight</h2>
+          <span id="coachMood">checking data</span>
+        </div>
+        <div id="coachInsight" class="coach-insight"></div>
+      </section>
+
+      <section class="home-dashboard" aria-label="Today dashboard">
+        <section class="panel home-mission-card">
+          <div class="panel-header simple">
+            <h2>Today’s Mission</h2>
+            <span id="homeMissionStatus">ready</span>
+          </div>
+          <div id="todayMissionList" class="home-mission-list"></div>
+          <a class="mission-link" href="workout.html#log">Go to Workout</a>
+        </section>
+
+        <section class="panel home-mission-card">
+          <div class="panel-header simple">
+            <h2>Weekly Quest</h2>
+            <span id="homeQuestText">0/7</span>
+          </div>
+          <div class="quest-meter"><i id="homeQuestFill"></i></div>
+          <p id="homeNextAction" class="empty-state">Complete today’s workout to keep the streak alive.</p>
+        </section>
+      </section>
+
+      <section class="panel home-activity-panel">
+        <div class="panel-header simple">
+          <h2>Recent Activity</h2>
+          <span>last sessions</span>
+        </div>
+        <div id="homeActivityList" class="home-activity-list"></div>
+      </section>
+
+      <section class="log-layout" aria-label="Fitness tracker">
+        <section class="panel calendar-panel">
+          <div class="panel-header">
+            <button class="icon-button" id="prevMonth" type="button" aria-label="Previous month">‹</button>
+            <h2 id="monthTitle">Month</h2>
+            <button class="icon-button" id="nextMonth" type="button" aria-label="Next month">›</button>
+          </div>
+          <div class="calendar-weekdays" aria-hidden="true">
+            <span>Sun</span>
+            <span>Mon</span>
+            <span>Tue</span>
+            <span>Wed</span>
+            <span>Thu</span>
+            <span>Fri</span>
+            <span>Sat</span>
+          </div>
+          <div class="calendar" id="calendar" aria-label="Workout calendar"></div>
+        </section>
+      </section>
+    </main>
+
+    <div class="day-modal" id="dayModal" hidden>
+      <div class="day-modal-card" role="dialog" aria-modal="true" aria-labelledby="dayModalTitle">
+        <div class="panel-header simple">
+          <h2 id="dayModalTitle">Day Details</h2>
+          <button class="text-button" id="closeDayModal" type="button">Close</button>
+        </div>
+        <div id="dayModalBody" class="day-modal-body"></div>
+      </div>
+    </div>
+
+    <script src="script.js?v=app-polish-16"></script>
+  </body>
+</html>

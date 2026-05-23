@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin | Overload Fitness Tracker</title>
+    <link rel="stylesheet" href="styles.css?v=app-polish-16" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="shop-hero">
+        <div>
+          <p class="eyebrow">Hidden admin</p>
+          <h1>Control room.</h1>
+        </div>
+      </section>
+
+      <section class="panel admin-lock-panel" id="adminLockPanel">
+        <div class="panel-header simple">
+          <h2>Admin Unlock</h2>
+          <span>local only</span>
+        </div>
+        <label>
+          Admin code
+          <input id="adminCodeInput" type="password" placeholder="Enter code" />
+        </label>
+        <button id="unlockAdminButton" type="button">Unlock</button>
+        <p class="empty-state">This page is hidden from the app menu. For a real public site, this would need real accounts and login security.</p>
+      </section>
+
+      <section class="admin-dashboard" id="adminDashboard" hidden>
+        <section class="panel">
+          <div class="panel-header simple">
+            <h2>Created Workouts</h2>
+            <span>edit or delete</span>
+          </div>
+          <div id="adminWorkoutList" class="admin-workout-list"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header simple">
+            <h2>Data Tools</h2>
+            <span>backup and reset</span>
+          </div>
+          <div class="admin-actions">
+            <button id="exportAdminData" type="button">Export Data</button>
+            <button id="clearCreatedWorkouts" class="delete-button" type="button">Clear Created Workouts</button>
+          </div>
+          <textarea id="adminDataBox" rows="8" placeholder="Exported data will show here."></textarea>
+        </section>
+      </section>
+    </main>
+
+    <script src="admin.js"></script>
+  </body>
+</html>

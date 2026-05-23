@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Workout | Overload Fitness Tracker</title>
+    <link rel="stylesheet" href="styles.css?v=app-polish-16" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <nav class="game-nav" aria-label="App pages">
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link active" href="workout.html">Workout</a>
+        <a class="nav-link" href="goals.html">Set Goals</a>
+        <a class="nav-link" href="shop.html">Shop</a>
+        <a class="nav-link" href="progression.html">Progression</a>
+      </nav>
+
+      <section class="hero workout-hero">
+        <div>
+          <p class="eyebrow">Workout station</p>
+          <h1>Log the work. Claim the XP.</h1>
+        </div>
+        <div class="scoreboard" aria-label="Training summary">
+          <div class="streak-card">
+            <span class="flame" aria-hidden="true">🔥</span>
+            <span id="streakCount">0</span>
+            <small>day streak</small>
+          </div>
+          <div>
+            <span id="totalWorkouts">0</span>
+            <small>days logged</small>
+          </div>
+          <div>
+            <span id="totalVolume">0</span>
+            <small>total volume</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="xp-panel" aria-label="Training XP">
+        <div>
+          <p class="eyebrow">Player progress</p>
+          <h2 id="xpText">Level 1 · 0 XP</h2>
+        </div>
+        <div class="xp-track" aria-hidden="true">
+          <div id="xpFill" class="xp-fill"></div>
+        </div>
+      </section>
+
+      <section class="workout-mode-panel" aria-label="Workout options">
+        <button class="workout-mode-button active" type="button" data-workout-mode-button="create">Create Workout</button>
+        <button class="workout-mode-button" type="button" data-workout-mode-button="log">Log Workout</button>
+      </section>
+
+      <section class="panel workout-command-panel">
+        <div class="panel-header simple">
+          <h2>Today’s Training</h2>
+          <span id="workoutTodayHint">pick or build</span>
+        </div>
+        <div id="workoutTodayList" class="home-mission-list"></div>
+      </section>
+
+      <section class="log-layout workout-mode-section active" data-workout-mode="create" aria-label="Create workout">
+        <section class="panel create-workout-panel">
+          <div class="panel-header simple">
+            <h2>Create Workout</h2>
+            <span>build your routine</span>
+          </div>
+          <div class="create-builder">
+            <label>
+              Name Workout
+              <input id="newWorkoutName" type="text" placeholder="Push day, leg day, cardio day..." />
+            </label>
+
+            <section class="template-strip" aria-label="Workout templates">
+              <button type="button" data-workout-template="push">Push</button>
+              <button type="button" data-workout-template="pull">Pull</button>
+              <button type="button" data-workout-template="legs">Legs</button>
+              <button type="button" data-workout-template="conditioning">Conditioning</button>
+            </section>
+
+            <div class="builder-header">
+              <h3>Add Exercise</h3>
+              <div class="builder-actions">
+                <button id="fillExampleWorkout" class="text-button" type="button">Fill Example</button>
+                <button id="addExerciseBox" class="text-button" type="button">Add Exercise</button>
+              </div>
+            </div>
+
+            <div id="exerciseBoxList" class="exercise-box-list"></div>
+
+            <section class="repeat-days-panel" aria-label="Repeat workout days">
+              <h3>Repeat Workout</h3>
+              <div class="repeat-day-grid">
+                <label><input type="checkbox" name="repeatDay" value="Sun" /> Sun</label>
+                <label><input type="checkbox" name="repeatDay" value="Mon" /> Mon</label>
+                <label><input type="checkbox" name="repeatDay" value="Tue" /> Tue</label>
+                <label><input type="checkbox" name="repeatDay" value="Wed" /> Wed</label>
+                <label><input type="checkbox" name="repeatDay" value="Thu" /> Thu</label>
+                <label><input type="checkbox" name="repeatDay" value="Fri" /> Fri</label>
+                <label><input type="checkbox" name="repeatDay" value="Sat" /> Sat</label>
+              </div>
+            </section>
+
+            <button id="createWorkoutButton" class="create-workout-button" type="button">Create Workout</button>
+          </div>
+        </section>
+      </section>
+
+      <section class="log-layout workout-mode-section" data-workout-mode="log" aria-label="Workout tracker">
+        <section class="panel saved-workout-picker">
+          <div class="panel-header simple">
+            <h2>Available Workouts</h2>
+            <span>pick one to log</span>
+          </div>
+          <label>
+            Select workout
+            <select id="savedWorkoutSelect">
+              <option value="">No workouts created yet</option>
+            </select>
+          </label>
+          <div id="savedWorkoutGrid" class="saved-workout-grid"></div>
+          <div id="selectedWorkoutPreview" class="selected-workout-preview">
+            <p class="empty-state">Create a workout first, then it will show here.</p>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="script.js?v=app-polish-16"></script>
+  </body>
+</html>

@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Progression Tracker</title>
+    <link rel="stylesheet" href="styles.css?v=app-polish-16" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <nav class="game-nav" aria-label="App pages">
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link" href="workout.html">Workout</a>
+        <a class="nav-link" href="goals.html">Set Goals</a>
+        <a class="nav-link" href="shop.html">Shop</a>
+        <a class="nav-link active" href="progression.html">Progression</a>
+      </nav>
+
+      <section class="shop-hero">
+        <div>
+          <p class="eyebrow">Progression tracker</p>
+          <h1>Track your climb.</h1>
+        </div>
+      </section>
+
+      <section class="progress-summary" id="progressSummary" aria-label="Progress summary"></section>
+
+      <section class="panel training-readiness-panel">
+        <div class="panel-header simple">
+          <h2>Training Readiness</h2>
+          <span id="readinessLabel">checking</span>
+        </div>
+        <div id="trainingReadiness" class="training-readiness"></div>
+      </section>
+
+      <section class="progress-insights">
+        <section class="panel">
+          <div class="panel-header simple">
+            <h2>Personal Bests</h2>
+            <span>your wins</span>
+          </div>
+          <div id="personalBestList" class="progress-card-list"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header simple">
+            <h2>Next Targets</h2>
+            <span>next move</span>
+          </div>
+          <div id="nextTargetList" class="progress-card-list"></div>
+          <a class="connected-action" href="workout.html#log">Train These Next</a>
+        </section>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header simple">
+          <h2>Effort Trend</h2>
+          <span>session intensity</span>
+        </div>
+        <canvas id="effortChart" width="900" height="260" aria-label="Effort trend graph"></canvas>
+        <p id="effortEmpty" class="empty-state">Finish workouts with effort scores to see this trend.</p>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header simple">
+          <h2>Recent Sessions</h2>
+          <span>what you finished</span>
+        </div>
+        <div id="recentSessionList" class="progress-card-list"></div>
+      </section>
+
+      <details class="progress-details">
+        <summary>Open Deep Stats</summary>
+        <section class="progress-insights">
+          <section class="panel graph-panel">
+            <div class="panel-header simple">
+              <h2>Consistency Map</h2>
+              <span>completed days</span>
+            </div>
+            <div id="consistencyMap" class="consistency-map"></div>
+          </section>
+
+          <section class="panel graph-panel">
+            <div class="panel-header simple">
+              <h2>Muscle Balance</h2>
+              <span>weekly volume</span>
+            </div>
+            <div id="muscleBalance" class="muscle-balance"></div>
+          </section>
+        </section>
+
+        <section class="progress-grid">
+          <section class="panel graph-panel">
+            <div class="panel-header simple">
+              <h2>Reps Progress</h2>
+              <select id="repsExerciseSelect" aria-label="Choose exercise for reps graph"></select>
+            </div>
+            <canvas id="repsChart" width="900" height="360" aria-label="Reps progress graph"></canvas>
+            <p id="repsEmpty" class="empty-state">Log workouts first, then this graph will show reps over time.</p>
+          </section>
+
+          <section class="panel graph-panel">
+            <div class="panel-header simple">
+              <h2>Max Progress</h2>
+              <select id="maxMovementSelect" aria-label="Choose movement for max graph"></select>
+            </div>
+            <canvas id="maxChart" width="900" height="360" aria-label="Max progress graph"></canvas>
+            <p id="maxEmpty" class="empty-state">Log maxes first, then this graph will show maxes over time.</p>
+          </section>
+
+          <section class="panel graph-panel">
+            <div class="panel-header simple">
+              <h2>Cardio Miles</h2>
+              <span>all cardio logs</span>
+            </div>
+            <canvas id="cardioChart" width="900" height="360" aria-label="Cardio miles graph"></canvas>
+            <p id="cardioEmpty" class="empty-state">Log cardio first, then this graph will show miles over time.</p>
+          </section>
+
+          <section class="panel graph-panel">
+            <div class="panel-header simple">
+              <h2>Weekly Volume</h2>
+              <span>exercise work</span>
+            </div>
+            <canvas id="volumeChart" width="900" height="360" aria-label="Weekly volume graph"></canvas>
+            <p id="volumeEmpty" class="empty-state">Log workouts first, then this graph will show weekly volume.</p>
+          </section>
+        </section>
+      </details>
+    </main>
+
+    <script src="progression.js?v=app-polish-16"></script>
+  </body>
+</html>

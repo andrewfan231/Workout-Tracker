@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Set Goals</title>
+    <link rel="stylesheet" href="styles.css?v=app-polish-16" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <nav class="game-nav" aria-label="App pages">
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link" href="workout.html">Workout</a>
+        <a class="nav-link active" href="goals.html">Set Goals</a>
+        <a class="nav-link" href="shop.html">Shop</a>
+        <a class="nav-link" href="progression.html">Progression</a>
+      </nav>
+
+      <section class="shop-hero">
+        <div>
+          <p class="eyebrow">Set goals</p>
+          <h1>Choose your targets.</h1>
+        </div>
+      </section>
+
+      <section class="panel connected-panel">
+        <div>
+          <p class="eyebrow">Goals connect to Home</p>
+          <h2>Saved goals show up as reminders on the Home page.</h2>
+        </div>
+        <a class="connected-action" href="index.html">View Home</a>
+      </section>
+
+      <section class="panel goals-panel">
+        <h2>Mission Goals</h2>
+        <form id="goalsForm" class="goals-form">
+          <section class="goal-grid">
+            <article class="goal-card">
+              <p class="eyebrow">Daily</p>
+              <label>
+                Goal type
+                <select id="dailyGoalType">
+                  <option value="workouts">Complete workouts</option>
+                  <option value="cardio">Cardio miles</option>
+                  <option value="max">Hit a max</option>
+                  <option value="streak">Protect streak</option>
+                </select>
+              </label>
+              <label>
+                Target
+                <input id="dailyGoalTarget" type="number" min="0" step="0.1" value="1" />
+              </label>
+              <div class="goal-details" data-period="daily">
+                <label>Date <input id="dailyGoalDate" type="date" /></label>
+                <label>Exercise <input id="dailyGoalExercise" type="text" placeholder="Bench, run, squats..." /></label>
+                <div class="input-row">
+                  <label>Weight <input id="dailyGoalWeight" type="number" min="0" step="0.5" /></label>
+                  <label>Miles <input id="dailyGoalMiles" type="number" min="0" step="0.01" /></label>
+                </div>
+                <div class="input-row">
+                  <label>Sets <input id="dailyGoalSets" type="number" min="0" step="1" /></label>
+                  <label>Reps <input id="dailyGoalReps" type="number" min="0" step="1" /></label>
+                </div>
+                <label>Notes <textarea id="dailyGoalNotes" rows="3" placeholder="Why this goal matters..."></textarea></label>
+              </div>
+            </article>
+
+            <article class="goal-card">
+              <p class="eyebrow">Weekly</p>
+              <label>
+                Goal type
+                <select id="weeklyGoalType">
+                  <option value="workouts">Complete workouts</option>
+                  <option value="cardio">Cardio miles</option>
+                  <option value="max">Hit maxes</option>
+                  <option value="volume">Training volume</option>
+                </select>
+              </label>
+              <label>
+                Target
+                <input id="weeklyGoalTarget" type="number" min="1" step="0.1" value="7" />
+              </label>
+              <div class="goal-details" data-period="weekly">
+                <label>Date <input id="weeklyGoalDate" type="date" /></label>
+                <label>Exercise <input id="weeklyGoalExercise" type="text" placeholder="Bench, run, squats..." /></label>
+                <div class="input-row">
+                  <label>Weight <input id="weeklyGoalWeight" type="number" min="0" step="0.5" /></label>
+                  <label>Miles <input id="weeklyGoalMiles" type="number" min="0" step="0.01" /></label>
+                </div>
+                <div class="input-row">
+                  <label>Sets <input id="weeklyGoalSets" type="number" min="0" step="1" /></label>
+                  <label>Reps <input id="weeklyGoalReps" type="number" min="0" step="1" /></label>
+                </div>
+                <label>Notes <textarea id="weeklyGoalNotes" rows="3" placeholder="What would make this week a win?"></textarea></label>
+              </div>
+            </article>
+
+            <article class="goal-card">
+              <p class="eyebrow">Monthly</p>
+              <label>
+                Goal type
+                <select id="monthlyGoalType">
+                  <option value="workouts">Complete workouts</option>
+                  <option value="cardio">Cardio miles</option>
+                  <option value="max">Hit maxes</option>
+                  <option value="volume">Training volume</option>
+                </select>
+              </label>
+              <label>
+                Target
+                <input id="monthlyGoalTarget" type="number" min="1" step="0.1" value="31" />
+              </label>
+              <div class="goal-details" data-period="monthly">
+                <label>Date <input id="monthlyGoalDate" type="date" /></label>
+                <label>Exercise <input id="monthlyGoalExercise" type="text" placeholder="Bench, run, squats..." /></label>
+                <div class="input-row">
+                  <label>Weight <input id="monthlyGoalWeight" type="number" min="0" step="0.5" /></label>
+                  <label>Miles <input id="monthlyGoalMiles" type="number" min="0" step="0.01" /></label>
+                </div>
+                <div class="input-row">
+                  <label>Sets <input id="monthlyGoalSets" type="number" min="0" step="1" /></label>
+                  <label>Reps <input id="monthlyGoalReps" type="number" min="0" step="1" /></label>
+                </div>
+                <label>Notes <textarea id="monthlyGoalNotes" rows="3" placeholder="What should improve this month?"></textarea></label>
+              </div>
+            </article>
+
+            <article class="goal-card">
+              <p class="eyebrow">Yearly</p>
+              <label>
+                Goal type
+                <select id="yearlyGoalType">
+                  <option value="workouts">Complete workouts</option>
+                  <option value="cardio">Cardio miles</option>
+                  <option value="max">Hit maxes</option>
+                  <option value="volume">Training volume</option>
+                </select>
+              </label>
+              <label>
+                Target
+                <input id="yearlyGoalTarget" type="number" min="0" step="0.1" value="200" />
+              </label>
+              <div class="goal-details" data-period="yearly">
+                <label>Date <input id="yearlyGoalDate" type="date" /></label>
+                <label>Exercise <input id="yearlyGoalExercise" type="text" placeholder="Bench, run, squats..." /></label>
+                <div class="input-row">
+                  <label>Weight <input id="yearlyGoalWeight" type="number" min="0" step="0.5" /></label>
+                  <label>Miles <input id="yearlyGoalMiles" type="number" min="0" step="0.01" /></label>
+                </div>
+                <div class="input-row">
+                  <label>Sets <input id="yearlyGoalSets" type="number" min="0" step="1" /></label>
+                  <label>Reps <input id="yearlyGoalReps" type="number" min="0" step="1" /></label>
+                </div>
+                <label>Notes <textarea id="yearlyGoalNotes" rows="3" placeholder="The big mission."></textarea></label>
+              </div>
+            </article>
+          </section>
+          <button type="submit">Save goals</button>
+        </form>
+        <p id="goalsSaved" class="empty-state" hidden>Goals saved.</p>
+      </section>
+
+      <section class="panel goals-panel">
+        <h2>Workout Goal Progress</h2>
+        <div class="goal-meter-list">
+          <article class="goal-meter-card">
+            <div class="panel-header simple">
+              <h3>Weekly Goal</h3>
+              <span id="weeklyMeterText">0/7</span>
+            </div>
+            <div class="goal-meter-track">
+              <div id="weeklyMeterFill" class="goal-meter-fill"></div>
+            </div>
+          </article>
+
+          <article class="goal-meter-card">
+            <div class="panel-header simple">
+              <h3>Monthly Goal</h3>
+              <span id="monthlyMeterText">0/31</span>
+            </div>
+            <div class="goal-meter-track">
+              <div id="monthlyMeterFill" class="goal-meter-fill"></div>
+            </div>
+          </article>
+
+          <article class="goal-meter-card">
+            <div class="panel-header simple">
+              <h3>Yearly Goal</h3>
+              <span id="yearlyMeterText">0/200</span>
+            </div>
+            <div class="goal-meter-track">
+              <div id="yearlyMeterFill" class="goal-meter-fill"></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel goals-panel">
+        <h2>Backup</h2>
+        <div class="backup-actions">
+          <button id="exportData" type="button">Export data</button>
+          <label class="import-label">
+            Import data
+            <input id="importData" type="file" accept="application/json" />
+          </label>
+        </div>
+        <textarea id="backupBox" rows="8" readonly placeholder="Your exported backup will appear here."></textarea>
+      </section>
+    </main>
+    <script src="goals.js?v=app-polish-16"></script>
+  </body>
+</html>

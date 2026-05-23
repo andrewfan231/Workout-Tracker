@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Reward Shop</title>
+    <link rel="stylesheet" href="styles.css?v=app-polish-16" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <nav class="game-nav" aria-label="App pages">
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link" href="workout.html">Workout</a>
+        <a class="nav-link" href="goals.html">Set Goals</a>
+        <a class="nav-link active" href="shop.html">Shop</a>
+        <a class="nav-link" href="progression.html">Progression</a>
+      </nav>
+
+      <section class="shop-hero">
+        <div>
+          <p class="eyebrow">Reward shop</p>
+          <h1>Spend your XP.</h1>
+        </div>
+        <div class="coin-bank" aria-label="XP wallet">
+          <span class="coin" aria-hidden="true">✦</span>
+          <span id="shopXp">0 XP</span>
+          <small>available</small>
+          <small id="spentXp">0 XP spent</small>
+        </div>
+      </section>
+
+      <section class="quest-board" aria-label="Quests">
+        <article class="quest-card">
+          <div>
+            <p class="eyebrow">Weekly quest</p>
+            <h2>Hit your weekly workout goal</h2>
+            <p id="weekQuestProgress">0/7 days complete</p>
+          </div>
+          <span class="slot-price">+100 XP</span>
+        </article>
+
+        <article class="quest-card">
+          <div>
+            <p class="eyebrow">Monthly quest</p>
+            <h2>Hit your monthly workout goal</h2>
+            <p id="monthQuestProgress">0 days complete</p>
+          </div>
+          <span class="slot-price">+200 XP</span>
+        </article>
+      </section>
+
+      <section class="shop-dashboard" aria-label="Reward progress">
+        <section class="panel">
+          <div class="panel-header simple">
+            <h2>Next Unlock</h2>
+            <span id="nextUnlockStatus">checking</span>
+          </div>
+          <div id="nextUnlockList" class="progress-card-list"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header simple">
+            <h2>Achievement Vault</h2>
+            <span>earned by action</span>
+          </div>
+          <div id="shopBadgeList" class="badge-list"></div>
+        </section>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header simple">
+          <h2>Bonus Challenges</h2>
+          <span>more ways to win</span>
+        </div>
+        <div id="bonusChallengeList" class="bonus-challenge-list"></div>
+      </section>
+
+      <section class="panel connected-panel">
+        <div>
+          <p class="eyebrow">Need more XP?</p>
+          <h2>Complete a workout to earn today’s check.</h2>
+        </div>
+        <a class="connected-action" href="workout.html#log">Start Workout</a>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header simple">
+          <h2>Reward History</h2>
+          <span>what you claimed</span>
+        </div>
+        <div id="rewardHistory" class="log-list"></div>
+      </section>
+
+      <section class="shop-board" aria-label="Reward slots">
+        <article class="shop-slot reward-ready fast-food-slot">
+          <div class="slot-top">
+            <span class="burger-icon" aria-label="Cartoon burger">
+              <span class="burger-bun top"></span>
+              <span class="burger-cheese"></span>
+              <span class="burger-patty"></span>
+              <span class="burger-bun bottom"></span>
+            </span>
+            <span class="slot-price">200 XP = $1</span>
+          </div>
+          <h2>Fast Food</h2>
+          <p>200 XP Points for $1 of Fast Food of your choice. Enjoy!</p>
+          <label class="spend-control">
+            XP to spend
+            <input id="fastFoodXpInput" type="number" min="0" step="200" value="0" />
+          </label>
+          <input id="fastFoodXpSlider" class="reward-slider" type="range" min="0" max="5000" step="200" value="0" />
+          <div class="reward-value" id="fastFoodValue">$0.00 fast food value</div>
+          <button class="redeem-button" type="button" data-reward-name="Fast Food" data-variable-input="fastFoodXpInput">Redeem</button>
+        </article>
+
+        <article class="shop-slot reward-ready">
+          <div class="slot-top">
+            <span class="chocolate-icon" aria-label="Cartoon chocolate bar">
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
+            <span class="slot-price">1000 XP</span>
+          </div>
+          <h2>1 Serving of Candy</h2>
+          <p>ONE serving of candy, lil bro. Enjoy!</p>
+          <button class="redeem-button" type="button" data-reward-name="1 Serving of Candy" data-reward-cost="1000">Redeem</button>
+        </article>
+
+        <article class="shop-slot reward-ready">
+          <div class="slot-top">
+            <span class="soda-icon" aria-label="Cartoon soda can">
+              <span class="soda-top"></span>
+              <span class="soda-shine"></span>
+              <span class="soda-label">POP</span>
+            </span>
+            <span class="slot-price">1000 XP</span>
+          </div>
+          <h2>Soda</h2>
+          <p>One can or serving of soda of your choice. Enjoy!</p>
+          <button class="redeem-button" type="button" data-reward-name="Soda" data-reward-cost="1000">Redeem</button>
+        </article>
+
+        <article class="shop-slot reward-ready">
+          <div class="slot-top">
+            <span class="streak-icon" aria-label="Cartoon streak flame">
+              <span class="streak-flame">🔥</span>
+              <span class="streak-shield"></span>
+            </span>
+            <span class="slot-price">5000 XP</span>
+          </div>
+          <h2>Streak Saver</h2>
+          <p>A Streak Saver for one day</p>
+          <button class="redeem-button" type="button" data-reward-name="Streak Saver" data-reward-cost="5000">Redeem</button>
+        </article>
+
+        <article class="shop-slot">
+          <div class="slot-top">
+            <span class="slot-icon">?</span>
+            <span class="slot-price">___ XP</span>
+          </div>
+          <h2>Empty Reward Slot</h2>
+          <p>Add a real reward here later.</p>
+          <button type="button" disabled>Locked</button>
+        </article>
+
+        <article class="shop-slot">
+          <div class="slot-top">
+            <span class="slot-icon">?</span>
+            <span class="slot-price">___ XP</span>
+          </div>
+          <h2>Empty Reward Slot</h2>
+          <p>Add a real reward here later.</p>
+          <button type="button" disabled>Locked</button>
+        </article>
+
+        <article class="shop-slot">
+          <div class="slot-top">
+            <span class="slot-icon">?</span>
+            <span class="slot-price">___ XP</span>
+          </div>
+          <h2>Empty Reward Slot</h2>
+          <p>Add a real reward here later.</p>
+          <button type="button" disabled>Locked</button>
+        </article>
+
+        <article class="shop-slot">
+          <div class="slot-top">
+            <span class="slot-icon">?</span>
+            <span class="slot-price">___ XP</span>
+          </div>
+          <h2>Empty Reward Slot</h2>
+          <p>Add a real reward here later.</p>
+          <button type="button" disabled>Locked</button>
+        </article>
+      </section>
+    </main>
+
+    <script src="shop.js?v=app-polish-16"></script>
+  </body>
+</html>
