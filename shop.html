@@ -3,8 +3,19 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#2f80ff" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Workout XP" />
     <title>Reward Shop</title>
-    <link rel="stylesheet" href="styles.css?v=app-polish-16" />
+    <meta name="description" content="A premium workout tracker with earned rewards, goals, XP, streaks, and performance progress." />
+    <meta property="og:title" content="Reward Shop" />
+    <meta property="og:description" content="A premium workout tracker with earned rewards, goals, XP, streaks, and performance progress." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://andrewsworkouttracker.netlify.app/" />
+    <meta property="og:image" content="https://andrewsworkouttracker.netlify.app/app-icon.svg" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="app-icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css?v=app-polish-46" />
   </head>
   <body>
     <main class="app-shell">
@@ -14,12 +25,13 @@
         <a class="nav-link" href="goals.html">Set Goals</a>
         <a class="nav-link active" href="shop.html">Shop</a>
         <a class="nav-link" href="progression.html">Progression</a>
+        <a class="nav-link" href="profile.html">Profile</a>
       </nav>
 
       <section class="shop-hero">
         <div>
-          <p class="eyebrow">Reward shop</p>
-          <h1>Spend your XP.</h1>
+          <p class="eyebrow">Reward vault</p>
+          <h1>Turn consistency into rewards.</h1>
         </div>
         <div class="coin-bank" aria-label="XP wallet">
           <span class="coin" aria-hidden="true">✦</span>
@@ -50,6 +62,14 @@
       </section>
 
       <section class="shop-dashboard" aria-label="Reward progress">
+        <section class="panel">
+          <div class="panel-header simple">
+            <h2>Unlock Focus</h2>
+            <span id="unlockFocusStatus">checking</span>
+          </div>
+          <div id="unlockFocus" class="unlock-focus"></div>
+        </section>
+
         <section class="panel">
           <div class="panel-header simple">
             <h2>Next Unlock</h2>
@@ -83,15 +103,55 @@
         <a class="connected-action" href="workout.html#log">Start Workout</a>
       </section>
 
+      <section class="panel reward-rule-panel">
+        <div>
+          <p class="eyebrow">Reward rule</p>
+          <h2>Rewards are planned wins, not random impulses.</h2>
+          <span>Spend XP when it supports consistency. Save when the bigger unlock will feel better.</span>
+        </div>
+      </section>
+
+      <section class="panel reward-budget-panel">
+        <div class="panel-header simple">
+          <h2>Smart Wallet</h2>
+          <span id="rewardBudgetStatus">checking</span>
+        </div>
+        <div id="rewardBudget" class="reward-budget"></div>
+      </section>
+
       <section class="panel">
         <div class="panel-header simple">
           <h2>Reward History</h2>
-          <span>what you claimed</span>
+          <span id="rewardHistoryStatus">what you claimed</span>
         </div>
+        <div id="rewardPace" class="reward-pace"></div>
         <div id="rewardHistory" class="log-list"></div>
       </section>
 
-      <section class="shop-board" aria-label="Reward slots">
+      <section class="panel custom-reward-panel">
+        <div class="panel-header simple">
+          <h2>Custom Rewards</h2>
+          <span>make it yours</span>
+        </div>
+        <form id="customRewardForm" class="custom-reward-form">
+          <label>
+            Reward name
+            <input id="customRewardName" type="text" placeholder="Movie night, new hoodie, gym gear..." />
+          </label>
+          <label>
+            XP cost
+            <input id="customRewardCost" type="number" min="1" step="50" placeholder="1500" />
+          </label>
+          <label>
+            Description
+            <input id="customRewardDescription" type="text" placeholder="What exactly does this unlock?" />
+          </label>
+          <button type="submit">Add Reward</button>
+        </form>
+        <div id="customRewardList" class="custom-reward-list"></div>
+      </section>
+
+      <section id="rewardBoard" class="shop-board" aria-label="Reward slots">
         <article class="shop-slot reward-ready fast-food-slot">
           <div class="slot-top">
             <span class="burger-icon" aria-label="Cartoon burger">
@@ -124,7 +184,7 @@
             <span class="slot-price">1000 XP</span>
           </div>
           <h2>1 Serving of Candy</h2>
-          <p>ONE serving of candy, lil bro. Enjoy!</p>
+          <p>ONE serving of candy. Enjoy the win.</p>
           <button class="redeem-button" type="button" data-reward-name="1 Serving of Candy" data-reward-cost="1000">Redeem</button>
         </article>
 
@@ -197,6 +257,7 @@
       </section>
     </main>
 
-    <script src="shop.js?v=app-polish-16"></script>
+    <script src="shop.js?v=app-polish-46"></script>
+    <script src="pwa.js?v=app-polish-46"></script>
   </body>
 </html>

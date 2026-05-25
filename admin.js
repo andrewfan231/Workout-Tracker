@@ -3,6 +3,7 @@ const WORKOUT_STORAGE_KEY = "overload-fitness-tracker";
 const CARDIO_STORAGE_KEY = "overload-fitness-cardio-log";
 const MAX_STORAGE_KEY = "overload-fitness-max-log";
 const REDEMPTION_STORAGE_KEY = "overload-fitness-redemptions";
+const CUSTOM_REWARDS_STORAGE_KEY = "overload-fitness-custom-rewards";
 const GOALS_STORAGE_KEY = "overload-fitness-goals";
 const COMPLETED_WORKOUTS_STORAGE_KEY = "overload-fitness-completed-workouts";
 const ADMIN_CODE = "overload";
@@ -46,6 +47,7 @@ exportAdminData.addEventListener("click", () => {
       cardioLogs: load(CARDIO_STORAGE_KEY, []),
       maxLogs: load(MAX_STORAGE_KEY, []),
       redemptions: load(REDEMPTION_STORAGE_KEY, []),
+      customRewards: load(CUSTOM_REWARDS_STORAGE_KEY, []),
       goals: load(GOALS_STORAGE_KEY, {}),
     },
     null,

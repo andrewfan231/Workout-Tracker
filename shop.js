@@ -4,16 +4,28 @@ const CARDIO_STORAGE_KEY = "overload-fitness-cardio-log";
 const REDEMPTION_STORAGE_KEY = "overload-fitness-redemptions";
 const GOALS_STORAGE_KEY = "overload-fitness-goals";
 const COMPLETED_WORKOUTS_STORAGE_KEY = "overload-fitness-completed-workouts";
+const CUSTOM_REWARDS_STORAGE_KEY = "overload-fitness-custom-rewards";
 
 const shopXp = document.querySelector("#shopXp");
 const spentXp = document.querySelector("#spentXp");
 const weekQuestProgress = document.querySelector("#weekQuestProgress");
 const monthQuestProgress = document.querySelector("#monthQuestProgress");
 const rewardHistory = document.querySelector("#rewardHistory");
+const rewardHistoryStatus = document.querySelector("#rewardHistoryStatus");
+const rewardPace = document.querySelector("#rewardPace");
+const rewardBudget = document.querySelector("#rewardBudget");
+const rewardBudgetStatus = document.querySelector("#rewardBudgetStatus");
+const customRewardForm = document.querySelector("#customRewardForm");
+const customRewardName = document.querySelector("#customRewardName");
+const customRewardCost = document.querySelector("#customRewardCost");
+const customRewardDescription = document.querySelector("#customRewardDescription");
+const customRewardList = document.querySelector("#customRewardList");
 const fastFoodXpInput = document.querySelector("#fastFoodXpInput");
 const fastFoodXpSlider = document.querySelector("#fastFoodXpSlider");
 const fastFoodValue = document.querySelector("#fastFoodValue");
 const shopBoard = document.querySelector(".shop-board");
+const unlockFocus = document.querySelector("#unlockFocus");
+const unlockFocusStatus = document.querySelector("#unlockFocusStatus");
 const nextUnlockStatus = document.querySelector("#nextUnlockStatus");
 const nextUnlockList = document.querySelector("#nextUnlockList");
 const shopBadgeList = document.querySelector("#shopBadgeList");
@@ -23,24 +35,31 @@ const cardioEntries = load(CARDIO_STORAGE_KEY, []);
 const completedWorkouts = load(COMPLETED_WORKOUTS_STORAGE_KEY, []);
 const dailyEntries = load(DAILY_STORAGE_KEY, {});
 let redemptions = load(REDEMPTION_STORAGE_KEY, []);
+let customRewards = load(CUSTOM_REWARDS_STORAGE_KEY, []);
 const goals = loadGoals();
 
 renderBalance();
 renderQuests();
 renderFastFoodValue();
+renderRewardCardStates();
 renderRewardHistory();
+renderRewardBudget();
+renderUnlockFocus();
 renderNextUnlocks();
 renderShopBadges();
 renderBonusChallenges();
+renderCustomRewards();
 
 fastFoodXpInput.addEventListener("input", () => {
   fastFoodXpSlider.value = clampXp(fastFoodXpInput.value);
   renderFastFoodValue();
+  renderRewardCardStates();
 });
 
 fastFoodXpSlider.addEventListener("input", () => {
   fastFoodXpInput.value = fastFoodXpSlider.value;
   renderFastFoodValue();
+  renderRewardCardStates();
 });
 
 shopBoard.addEventListener("click", (event) => {
@@ -60,10 +79,65 @@ rewardHistory.addEventListener("click", (event) => {
   save(REDEMPTION_STORAGE_KEY, redemptions);
   renderBalance();
   renderFastFoodValue();
+  renderRewardCardStates();
   renderRewardHistory();
+  renderRewardBudget();
+  renderUnlockFocus();
   renderNextUnlocks();
   renderShopBadges();
   showShopToast("Redemption undone", "XP returned", false);
+});
+
+customRewardForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const name = customRewardName.value.trim();
+  const cost = Number(customRewardCost.value) || 0;
+  const description = customRewardDescription.value.trim();
+  if (!name || cost <= 0) {
+    showShopToast("Reward needs a name", "add a cost too", false);
+    return;
+  }
+
+  customRewards = [
+    ...customRewards,
+    {
+      id: crypto.randomUUID(),
+      name,
+      cost,
+      description,
+      createdAt: Date.now(),
+    },
+  ].sort((a, b) => Number(a.cost) - Number(b.cost));
+  save(CUSTOM_REWARDS_STORAGE_KEY, customRewards);
+  customRewardForm.reset();
+  renderCustomRewards();
+  renderRewardBudget();
+  renderUnlockFocus();
+  renderNextUnlocks();
+  renderBalance();
+  renderRewardCardStates();
+  showShopToast("Reward added", `${name} · ${cost.toLocaleString()} XP`, false);
+});
+
+customRewardList.addEventListener("click", (event) => {
+  const redeemButton = event.target.closest("[data-custom-redeem]");
+  const deleteButton = event.target.closest("[data-custom-delete]");
+
+  if (redeemButton) {
+    const reward = customRewards.find((item) => item.id === redeemButton.dataset.customRedeem);
+    if (reward) redeemReward(reward.name, Number(reward.cost) || 0);
+  }
+
+  if (deleteButton) {
+    customRewards = customRewards.filter((item) => item.id !== deleteButton.dataset.customDelete);
+    save(CUSTOM_REWARDS_STORAGE_KEY, customRewards);
+    renderCustomRewards();
+    renderRewardBudget();
+    renderUnlockFocus();
+    renderNextUnlocks();
+    renderRewardCardStates();
+    showShopToast("Reward removed", "custom list updated", false);
+  }
 });
 
 function load(key, fallback) {
@@ -100,6 +174,47 @@ function renderFastFoodValue() {
   fastFoodValue.textContent = `$${dollars.toFixed(2)} fast food value`;
 }
 
+function renderRewardCardStates() {
+  const availableXp = getAvailableXp();
+
+  document.querySelectorAll(".shop-slot.reward-ready").forEach((card) => {
+    const button = card.querySelector("[data-reward-name]");
+    if (!button) return;
+
+    const rewardName = button.dataset.rewardName || "Reward";
+    const inputId = button.dataset.variableInput;
+    const fixedCost = Number(button.dataset.rewardCost) || 0;
+    const selectedCost = inputId ? Number(document.querySelector(`#${inputId}`)?.value) || 0 : fixedCost;
+    const targetCost = selectedCost || fixedCost || 200;
+    const needed = Math.max(0, targetCost - availableXp);
+    const workoutEstimate = Math.max(1, Math.ceil(needed / 175));
+    let status = "";
+
+    card.classList.toggle("reward-affordable", needed === 0 && targetCost > 0);
+    card.classList.toggle("reward-locked", needed > 0);
+
+    if (inputId && selectedCost <= 0) {
+      status = availableXp >= 200 ? "Pick a 200 XP chunk, then redeem when it feels earned." : "Earn 200 XP to unlock your first fast food dollar.";
+      card.classList.remove("reward-affordable");
+    } else if (needed === 0) {
+      status = `${rewardName} is ready to redeem.`;
+    } else {
+      status = `${needed.toLocaleString()} XP away · about ${workoutEstimate} strong workout${workoutEstimate === 1 ? "" : "s"}.`;
+    }
+
+    let statusEl = card.querySelector(".reward-card-status");
+    if (!statusEl) {
+      statusEl = document.createElement("div");
+      statusEl.className = "reward-card-status";
+      const redeemButton = card.querySelector(".redeem-button");
+      if (redeemButton) card.insertBefore(statusEl, redeemButton);
+      else card.append(statusEl);
+    }
+
+    statusEl.textContent = status;
+  });
+}
+
 function clampXp(value) {
   const availableXp = getAvailableXp();
   const number = Math.max(0, Number(value) || 0);
@@ -133,15 +248,20 @@ function redeemReward(name, cost) {
   save(REDEMPTION_STORAGE_KEY, redemptions);
   renderBalance();
   renderFastFoodValue();
+  renderRewardCardStates();
   renderRewardHistory();
+  renderRewardBudget();
+  renderUnlockFocus();
   renderNextUnlocks();
   renderShopBadges();
   renderBonusChallenges();
+  renderCustomRewards();
   showShopToast("Reward redeemed", `${name} · ${cost.toLocaleString()} XP`, true);
   burstShopConfetti(28);
 }
 
 function renderRewardHistory() {
+  renderRewardPace();
   if (!redemptions.length) {
     rewardHistory.innerHTML = `<p class="empty-state">No rewards redeemed yet.</p>`;
     return;
@@ -164,15 +284,108 @@ function renderRewardHistory() {
     .join("");
 }
 
+function renderRewardPace() {
+  if (!rewardPace || !rewardHistoryStatus) return;
+  const spent = getSpentXp();
+  const earned = getEarnedXp();
+  const ratio = earned ? Math.round((spent / earned) * 100) : 0;
+  const last = [...redemptions].sort((a, b) => (b.redeemedAt || 0) - (a.redeemedAt || 0))[0];
+  const status = ratio <= 30 ? "controlled" : ratio <= 65 ? "active" : "high spend";
+  const note = spent
+    ? `${ratio}% of earned XP redeemed${last ? ` · last: ${escapeHtml(last.name)}` : ""}`
+    : "No XP spent yet. Save for something that feels earned.";
+
+  rewardHistoryStatus.textContent = status;
+  rewardPace.innerHTML = `
+    <div>
+      <strong>${spent.toLocaleString()} XP spent</strong>
+      <span>${note}</span>
+    </div>
+    <div class="quest-meter"><i style="width:${Math.min(100, ratio)}%"></i></div>
+  `;
+}
+
+function renderRewardBudget() {
+  if (!rewardBudget || !rewardBudgetStatus) return;
+  const earned = getEarnedXp();
+  const spent = getSpentXp();
+  const available = getAvailableXp();
+  const rewards = getRewardCatalog();
+  const nextLocked = rewards.find((reward) => reward.cost > available);
+  const affordableRewards = rewards.filter((reward) => reward.cost <= available);
+  const flexibleSpend = Math.max(0, Math.floor((available * 0.25) / 50) * 50);
+  const savedPercent = earned ? Math.round((available / earned) * 100) : 0;
+  const status = available >= 5000 ? "premium bank" : affordableRewards.length ? "ready" : "building";
+  const recommendation = nextLocked
+    ? `Save ${Math.max(0, nextLocked.cost - available).toLocaleString()} more XP for ${nextLocked.name}.`
+    : "You can afford every listed reward. Pick something that supports tomorrow too.";
+
+  rewardBudgetStatus.textContent = status;
+  rewardBudget.innerHTML = `
+    <article>
+      <strong>${flexibleSpend.toLocaleString()} XP</strong>
+      <span>Suggested fun spend</span>
+    </article>
+    <article>
+      <strong>${available.toLocaleString()} XP</strong>
+      <span>Available right now</span>
+    </article>
+    <article>
+      <strong>${savedPercent}% saved</strong>
+      <span>${spent.toLocaleString()} XP already redeemed</span>
+    </article>
+    <p>${escapeHtml(recommendation)}</p>
+  `;
+}
+
+function renderUnlockFocus() {
+  if (!unlockFocus || !unlockFocusStatus) return;
+  const availableXp = getAvailableXp();
+  const rewards = getRewardCatalog();
+  const next = rewards.find((reward) => reward.cost > availableXp) || rewards[rewards.length - 1];
+  const needed = Math.max(0, next.cost - availableXp);
+  const percent = Math.min(100, (availableXp / Math.max(1, next.cost)) * 100);
+  const workoutEstimate = Math.max(1, Math.ceil(needed / 175));
+
+  unlockFocusStatus.textContent = needed ? `${needed.toLocaleString()} XP away` : "ready";
+  unlockFocus.innerHTML = `
+    <strong>${escapeHtml(next.name)}</strong>
+    <span>${needed ? `${needed.toLocaleString()} XP left · about ${workoutEstimate} strong workout${workoutEstimate === 1 ? "" : "s"}` : "You can unlock this now."}</span>
+    <div class="quest-meter"><i style="width:${percent}%"></i></div>
+    <a href="${needed ? "workout.html#log" : "#rewardBoard"}">${needed ? "Earn XP" : "Choose Reward"}</a>
+  `;
+}
+
+function renderCustomRewards() {
+  if (!customRewardList) return;
+  const availableXp = getAvailableXp();
+  const sorted = [...customRewards].sort((a, b) => Number(a.cost) - Number(b.cost));
+
+  customRewardList.innerHTML = sorted.length
+    ? sorted
+        .map((reward) => {
+          const affordable = availableXp >= Number(reward.cost);
+          return `
+            <article class="custom-reward-card">
+              <div>
+                <strong>${escapeHtml(reward.name)}</strong>
+                <span>${Number(reward.cost).toLocaleString()} XP${reward.description ? ` · ${escapeHtml(reward.description)}` : ""}</span>
+              </div>
+              <div class="custom-reward-actions">
+                <button type="button" data-custom-redeem="${reward.id}" ${affordable ? "" : "disabled"}>Redeem</button>
+                <button class="text-button" type="button" data-custom-delete="${reward.id}">Remove</button>
+              </div>
+            </article>
+          `;
+        })
+        .join("")
+    : `<p class="empty-state">Add rewards that actually motivate you. Keep them specific and earned.</p>`;
+}
+
 function renderNextUnlocks() {
   if (!nextUnlockList || !nextUnlockStatus) return;
   const availableXp = getAvailableXp();
-  const rewards = [
-    { name: "Fast Food", cost: 200, detail: "$1 reward chunks" },
-    { name: "1 Serving of Candy", cost: 1000, detail: "ONE serving" },
-    { name: "Soda", cost: 1000, detail: "one can or serving" },
-    { name: "Streak Saver", cost: 5000, detail: "protect one day" },
-  ].sort((a, b) => a.cost - b.cost);
+  const rewards = getRewardCatalog();
   const nextRewards = rewards.filter((reward) => reward.cost > availableXp).slice(0, 3);
   const affordable = rewards.filter((reward) => reward.cost <= availableXp);
 
@@ -194,6 +407,20 @@ function renderNextUnlocks() {
         })
         .join("")
     : `<p class="empty-state">Everything is affordable. Spend smart or save for bigger rewards.</p>`;
+}
+
+function getRewardCatalog() {
+  return [
+    { name: "Fast Food", cost: 200, detail: "$1 reward chunks" },
+    { name: "1 Serving of Candy", cost: 1000, detail: "ONE serving" },
+    { name: "Soda", cost: 1000, detail: "one can or serving" },
+    { name: "Streak Saver", cost: 5000, detail: "protect one day" },
+    ...customRewards.map((reward) => ({
+      name: reward.name,
+      cost: Number(reward.cost) || 0,
+      detail: reward.description || "custom reward",
+    })),
+  ].sort((a, b) => a.cost - b.cost);
 }
 
 function renderShopBadges() {

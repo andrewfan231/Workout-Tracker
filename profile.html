@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#2f80ff" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Workout XP" />
+    <title>Profile | Overload Fitness Tracker</title>
+    <meta name="description" content="A premium workout tracker that personalizes training, progress, rewards, and body check-ins." />
+    <meta property="og:title" content="Profile | Overload Fitness Tracker" />
+    <meta property="og:description" content="A premium workout tracker that personalizes training, progress, rewards, and body check-ins." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://andrewsworkouttracker.netlify.app/" />
+    <meta property="og:image" content="https://andrewsworkouttracker.netlify.app/app-icon.svg" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="app-icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css?v=app-polish-46" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <nav class="game-nav" aria-label="App pages">
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link" href="workout.html">Workout</a>
+        <a class="nav-link" href="goals.html">Set Goals</a>
+        <a class="nav-link" href="shop.html">Shop</a>
+        <a class="nav-link" href="progression.html">Progression</a>
+        <a class="nav-link active" href="profile.html">Profile</a>
+      </nav>
+
+      <section class="shop-hero">
+        <div>
+          <p class="eyebrow">Athlete profile</p>
+          <h1>Personalize your training system.</h1>
+        </div>
+        <div class="profile-badge" aria-label="Player card">
+          <span id="profileInitial">P</span>
+          <strong id="profileNamePreview">Player</strong>
+          <small id="profileStylePreview">Training style not set</small>
+        </div>
+      </section>
+
+      <section class="panel athlete-snapshot-panel">
+        <div class="panel-header simple">
+          <h2>Athlete Snapshot</h2>
+          <span id="athleteSnapshotStatus">building profile</span>
+        </div>
+        <div id="athleteSnapshot" class="athlete-snapshot"></div>
+      </section>
+
+      <section class="profile-layout">
+        <section class="panel">
+          <div class="panel-header simple">
+            <h2>Profile Setup</h2>
+            <span>local beta</span>
+          </div>
+          <form id="profileForm" class="profile-form">
+            <label>
+              Display name
+              <input id="displayNameInput" type="text" placeholder="Andrew, Coach Drew, Athlete..." />
+            </label>
+            <label>
+              Training style
+              <select id="trainingStyleInput">
+                <option value="">Pick a style</option>
+                <option value="Strength">Strength</option>
+                <option value="Basketball">Basketball</option>
+                <option value="Bodybuilding">Bodybuilding</option>
+                <option value="Conditioning">Conditioning</option>
+                <option value="Weight loss">Weight loss</option>
+                <option value="Mobility">Mobility</option>
+                <option value="No equipment">No equipment</option>
+                <option value="General fitness">General fitness</option>
+              </select>
+            </label>
+            <label>
+              Main goal
+              <input id="mainGoalInput" type="text" placeholder="Get stronger, dunk, stay consistent..." />
+            </label>
+            <label>
+              Weekly promise
+              <input id="weeklyPromiseInput" type="text" placeholder="Example: 4 workouts and 1 run" />
+            </label>
+            <button type="submit">Save Profile</button>
+          </form>
+          <p id="profileSaved" class="empty-state" hidden>Profile saved.</p>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header simple">
+            <h2>Player Stats</h2>
+            <span>from your logs</span>
+          </div>
+          <div id="profileStats" class="profile-stat-grid"></div>
+        </section>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header simple">
+          <h2>Recommended Start</h2>
+          <span>based on profile</span>
+        </div>
+        <div id="profileRecommendation" class="profile-recommendation"></div>
+      </section>
+
+      <section class="profile-layout">
+        <section class="panel">
+          <div class="panel-header simple">
+            <h2>Body Check-In</h2>
+            <span>simple tracking</span>
+          </div>
+          <form id="bodyMetricForm" class="profile-form">
+            <label>
+              Date
+              <input id="bodyMetricDate" type="date" />
+            </label>
+            <label>
+              Bodyweight
+              <input id="bodyMetricWeight" type="text" placeholder="Example: 165 lb" />
+            </label>
+            <label>
+              Notes
+              <textarea id="bodyMetricNotes" rows="3" placeholder="Energy, sleep, soreness, progress picture note..."></textarea>
+            </label>
+            <button type="submit">Save Body Check-In</button>
+          </form>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header simple">
+            <h2>Body History</h2>
+            <span>latest entries</span>
+          </div>
+          <div id="bodyMetricList" class="body-metric-list"></div>
+        </section>
+      </section>
+
+      <section class="panel connected-panel">
+        <div>
+          <p class="eyebrow">Beta sharing</p>
+          <h2>Send your live site to a friend and ask them to try one workout.</h2>
+        </div>
+        <button id="copySiteLink" class="connected-action" type="button">Copy Link</button>
+      </section>
+
+      <section class="profile-layout">
+        <section class="panel">
+          <div class="panel-header simple">
+            <h2>Beta + Privacy</h2>
+            <span>important</span>
+          </div>
+          <div class="trust-list">
+            <article>
+              <strong>Early beta</strong>
+              <span>This version is ready to test, but it is still improving.</span>
+            </article>
+            <article>
+              <strong>Device storage</strong>
+              <span>Your workout data is saved in this browser. No cloud account yet.</span>
+            </article>
+            <article>
+              <strong>Next big upgrade</strong>
+              <span>Accounts and cloud saving come after people test the beta.</span>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header simple">
+            <h2>Data Controls</h2>
+            <span>backup first</span>
+          </div>
+          <div id="dataSafety" class="data-safety"></div>
+          <div class="data-actions">
+            <button id="exportAllData" type="button">Export Data</button>
+            <label class="import-label">
+              Import Data
+              <input id="importAllData" type="file" accept="application/json" />
+            </label>
+            <button id="clearLocalData" class="delete-button" type="button">Clear Local Data</button>
+          </div>
+          <textarea id="profileBackupBox" rows="7" readonly placeholder="Your backup will appear here."></textarea>
+        </section>
+      </section>
+    </main>
+
+    <script src="profile.js?v=app-polish-46"></script>
+    <script src="pwa.js?v=app-polish-46"></script>
+  </body>
+</html>

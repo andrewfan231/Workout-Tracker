@@ -3,8 +3,19 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#2f80ff" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Workout XP" />
     <title>Progression Tracker</title>
-    <link rel="stylesheet" href="styles.css?v=app-polish-16" />
+    <meta name="description" content="A premium workout tracker for strength progress, training history, goals, and performance insights." />
+    <meta property="og:title" content="Progression Tracker" />
+    <meta property="og:description" content="A premium workout tracker for strength progress, training history, goals, and performance insights." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://andrewsworkouttracker.netlify.app/" />
+    <meta property="og:image" content="https://andrewsworkouttracker.netlify.app/app-icon.svg" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="app-icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css?v=app-polish-46" />
   </head>
   <body>
     <main class="app-shell">
@@ -14,12 +25,13 @@
         <a class="nav-link" href="goals.html">Set Goals</a>
         <a class="nav-link" href="shop.html">Shop</a>
         <a class="nav-link active" href="progression.html">Progression</a>
+        <a class="nav-link" href="profile.html">Profile</a>
       </nav>
 
       <section class="shop-hero">
         <div>
-          <p class="eyebrow">Progression tracker</p>
-          <h1>Track your climb.</h1>
+          <p class="eyebrow">Performance review</p>
+          <h1>See what is actually improving.</h1>
         </div>
       </section>
 
@@ -31,6 +43,14 @@
           <span id="readinessLabel">checking</span>
         </div>
         <div id="trainingReadiness" class="training-readiness"></div>
+      </section>
+
+      <section class="panel progress-coach-panel">
+        <div class="panel-header simple">
+          <h2>Progress Coach</h2>
+          <span id="progressCoachStatus">reading trend</span>
+        </div>
+        <div id="progressCoach" class="progress-coach"></div>
       </section>
 
       <section class="progress-insights">
@@ -125,10 +145,20 @@
             <canvas id="volumeChart" width="900" height="360" aria-label="Weekly volume graph"></canvas>
             <p id="volumeEmpty" class="empty-state">Log workouts first, then this graph will show weekly volume.</p>
           </section>
+
+          <section class="panel graph-panel">
+            <div class="panel-header simple">
+              <h2>Bodyweight</h2>
+              <span>profile check-ins</span>
+            </div>
+            <canvas id="bodyChart" width="900" height="360" aria-label="Bodyweight graph"></canvas>
+            <p id="bodyEmpty" class="empty-state">Save body check-ins on Profile to see this trend.</p>
+          </section>
         </section>
       </details>
     </main>
 
-    <script src="progression.js?v=app-polish-16"></script>
+    <script src="progression.js?v=app-polish-46"></script>
+    <script src="pwa.js?v=app-polish-46"></script>
   </body>
 </html>

@@ -9,6 +9,8 @@ const goalsSaved = document.querySelector("#goalsSaved");
 const exportData = document.querySelector("#exportData");
 const importData = document.querySelector("#importData");
 const backupBox = document.querySelector("#backupBox");
+const goalCoach = document.querySelector("#goalCoach");
+const goalCoachStatus = document.querySelector("#goalCoachStatus");
 const weeklyMeterText = document.querySelector("#weeklyMeterText");
 const monthlyMeterText = document.querySelector("#monthlyMeterText");
 const yearlyMeterText = document.querySelector("#yearlyMeterText");
@@ -24,6 +26,7 @@ periods.forEach((period) => {
   loadGoalDetails(period, goals[period]?.details || {});
 });
 renderGoalMeters();
+renderGoalCoach();
 
 goalsForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -45,6 +48,7 @@ goalsForm.addEventListener("submit", (event) => {
   localStorage.setItem(GOALS_STORAGE_KEY, JSON.stringify(nextGoals));
   goals = nextGoals;
   renderGoalMeters();
+  renderGoalCoach();
   goalsSaved.hidden = false;
   setTimeout(() => {
     goalsSaved.hidden = true;
@@ -59,6 +63,7 @@ exportData.addEventListener("click", () => {
     "overload-fitness-created-workouts",
     "overload-fitness-completed-workouts",
     "overload-fitness-redemptions",
+    "overload-fitness-custom-rewards",
     "overload-fitness-goals",
   ];
   const backup = keys.reduce((data, key) => {
@@ -122,6 +127,33 @@ function renderGoalMeters() {
   updateMeter(yearlyMeterText, yearlyMeterFill, getGoalProgress("yearly"));
 }
 
+function renderGoalCoach() {
+  if (!goalCoach || !goalCoachStatus) return;
+  const progressItems = ["weekly", "monthly", "yearly"].map((period) => {
+    const progress = getGoalProgress(period);
+    const target = Math.max(1, Number(progress.target) || 1);
+    const percent = Math.min(100, (progress.done / target) * 100);
+    return { period, ...progress, percent };
+  });
+  const priority = progressItems
+    .filter((item) => item.percent < 100)
+    .sort((a, b) => a.percent - b.percent)[0] || progressItems[0];
+  const cleared = progressItems.every((item) => item.percent >= 100);
+  const title = cleared ? "All main goals are cleared" : `${capitalize(priority.period)} goal needs attention`;
+  const detail = cleared
+    ? "Strong work. Keep the targets honest or raise one slowly."
+    : `${formatNumber(priority.done)}/${formatNumber(priority.target)} ${priority.unit} complete. One focused session can move this forward.`;
+
+  goalCoachStatus.textContent = cleared ? "clear" : `${Math.round(priority.percent)}%`;
+  goalCoach.innerHTML = `
+    <div>
+      <strong>${title}</strong>
+      <span>${detail}</span>
+    </div>
+    <a class="connected-action" href="workout.html#log">Work On It</a>
+  `;
+}
+
 function updateMeter(text, fill, progress) {
   const { done, target, unit } = progress;
   const safeTarget = Math.max(1, Number(target) || 1);
@@ -176,6 +208,10 @@ function getVolume(log) {
 
 function formatNumber(value) {
   return Number(value || 0).toLocaleString(undefined, { maximumFractionDigits: 1 });
+}
+
+function capitalize(value) {
+  return String(value).charAt(0).toUpperCase() + String(value).slice(1);
 }
 
 function getCurrentWeekDates() {

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Workout XP app icon">
+  <defs>
+    <linearGradient id="bg" x1="80" y1="40" x2="430" y2="470" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#38d5ff"/>
+      <stop offset="0.55" stop-color="#2f80ff"/>
+      <stop offset="1" stop-color="#06162f"/>
+    </linearGradient>
+    <linearGradient id="flame" x1="255" y1="112" x2="255" y2="372" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffd166"/>
+      <stop offset="0.45" stop-color="#ff7a00"/>
+      <stop offset="1" stop-color="#ff2d95"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="108" fill="url(#bg)"/>
+  <circle cx="256" cy="256" r="166" fill="rgba(255,255,255,0.16)"/>
+  <path d="M268 101c22 48 87 80 87 159 0 66-45 126-101 126-61 0-104-49-104-111 0-46 28-82 58-112-2 41 20 64 44 71 30-37 16-78 16-133Z" fill="url(#flame)"/>
+  <path d="M162 310h188v42H162zM112 286h50v90h-50zM350 286h50v90h-50z" fill="#fff" opacity="0.94"/>
+  <path d="M212 414h88" stroke="#b7f5ff" stroke-width="28" stroke-linecap="round"/>
+</svg>

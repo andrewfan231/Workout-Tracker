@@ -7,6 +7,7 @@ const GOALS_STORAGE_KEY = "overload-fitness-goals";
 const CREATED_WORKOUTS_STORAGE_KEY = "overload-fitness-created-workouts";
 const COMPLETED_WORKOUTS_STORAGE_KEY = "overload-fitness-completed-workouts";
 const WORKOUT_DRAFT_STORAGE_KEY = "overload-fitness-workout-draft";
+const PROFILE_STORAGE_KEY = "overload-fitness-profile";
 
 const logTypeSelect = document.querySelector("#logTypeSelect");
 const logForm = document.querySelector("#logForm");
@@ -31,6 +32,7 @@ const maxUnitInput = document.querySelector("#maxUnitInput");
 const maxNotesInput = document.querySelector("#maxNotesInput");
 const calendar = document.querySelector("#calendar");
 const monthTitle = document.querySelector("#monthTitle");
+const monthSummary = document.querySelector("#monthSummary");
 const prevMonth = document.querySelector("#prevMonth");
 const nextMonth = document.querySelector("#nextMonth");
 const overloadList = document.querySelector("#overloadList");
@@ -52,10 +54,17 @@ const dayModalBody = document.querySelector("#dayModalBody");
 const closeDayModal = document.querySelector("#closeDayModal");
 const restTimerDisplay = document.querySelector("#restTimerDisplay");
 const stopRestTimer = document.querySelector("#stopRestTimer");
+const homeHeroTitle = document.querySelector("#homeHeroTitle");
+const homeHeroSubtitle = document.querySelector("#homeHeroSubtitle");
+const premiumCommandCenter = document.querySelector("#premiumCommandCenter");
+const dailyUpgrade = document.querySelector("#dailyUpgrade");
+const weeklyReport = document.querySelector("#weeklyReport");
+const firstWeekPlan = document.querySelector("#firstWeekPlan");
 const starterPath = document.querySelector("#starterPath");
 const todayMissionList = document.querySelector("#todayMissionList");
 const homeGoalReminder = document.querySelector("#homeGoalReminder");
 const homeActivityList = document.querySelector("#homeActivityList");
+const victoryShelf = document.querySelector("#victoryShelf");
 const coachInsight = document.querySelector("#coachInsight");
 const coachMood = document.querySelector("#coachMood");
 const homeMissionStatus = document.querySelector("#homeMissionStatus");
@@ -74,7 +83,9 @@ const newWorkoutName = document.querySelector("#newWorkoutName");
 const repeatDayInputs = document.querySelectorAll("input[name='repeatDay']");
 const savedWorkoutSelect = document.querySelector("#savedWorkoutSelect");
 const savedWorkoutGrid = document.querySelector("#savedWorkoutGrid");
+const workoutReadiness = document.querySelector("#workoutReadiness");
 const selectedWorkoutPreview = document.querySelector("#selectedWorkoutPreview");
+const pastWorkoutList = document.querySelector("#pastWorkoutList");
 let restTimerId = null;
 let restSeconds = 90;
 
@@ -84,6 +95,7 @@ let dailyEntries = loadDailyEntries();
 let maxEntries = loadMaxEntries();
 let redemptions = loadRedemptions();
 let goals = loadGoals();
+let profile = loadProfile();
 let createdWorkouts = loadCreatedWorkouts();
 let completedWorkouts = loadCompletedWorkouts();
 let visibleMonth = new Date();
@@ -96,10 +108,6 @@ if (cardioDateInput) cardioDateInput.value = toDateKey(new Date());
 if (maxDateInput) maxDateInput.value = toDateKey(new Date());
 render();
 renderLogType();
-if (window.location.hash === "#log") {
-  setWorkoutMode("log");
-  selectBestWorkoutForToday();
-}
 
 if (logTypeSelect) logTypeSelect.addEventListener("change", renderLogType);
 
@@ -115,11 +123,23 @@ if (savedWorkoutSelect) savedWorkoutSelect.addEventListener("change", () => {
   renderSavedWorkoutGrid([...createdWorkouts].sort((a, b) => Number(b.favorite) - Number(a.favorite) || (b.updatedAt || b.createdAt || 0) - (a.updatedAt || a.createdAt || 0)));
 });
 if (savedWorkoutGrid) savedWorkoutGrid.addEventListener("click", handleSavedWorkoutGridClick);
+if (workoutReadiness) workoutReadiness.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-readiness-start]");
+  if (!button || !savedWorkoutSelect) return;
+  savedWorkoutSelect.value = button.dataset.readinessStart;
+  renderSelectedWorkout();
+  renderWorkoutReadiness();
+  startSelectedWorkout();
+});
 if (selectedWorkoutPreview) selectedWorkoutPreview.addEventListener("click", handleWorkoutRunnerClick);
+if (pastWorkoutList) pastWorkoutList.addEventListener("click", handlePastWorkoutClick);
+if (homeActivityList) homeActivityList.addEventListener("click", handleHomeActivityClick);
 if (newWorkoutName) newWorkoutName.addEventListener("input", saveWorkoutDraft);
 if (exerciseBoxList) exerciseBoxList.addEventListener("input", saveWorkoutDraft);
 repeatDayInputs.forEach((input) => input.addEventListener("change", saveWorkoutDraft));
 restoreWorkoutDraft();
+handleInitialWorkoutHash();
+window.addEventListener("hashchange", handleInitialWorkoutHash);
 
 document.querySelectorAll("[data-template]").forEach((button) => {
   button.addEventListener("click", () => applyTemplate(button.dataset.template));
@@ -256,7 +276,12 @@ if (dayModal) dayModal.addEventListener("click", (event) => {
 
 function render() {
   renderSummary();
+  renderHomeHero();
   renderStarterPath();
+  renderPremiumCommandCenter();
+  renderDailyUpgrade();
+  renderWeeklyReport();
+  renderFirstWeekPlan();
   renderCalendar();
   renderOverload();
   renderLogs();
@@ -266,11 +291,13 @@ function render() {
   renderBadges();
   renderPersonalRecords();
   renderSavedWorkoutOptions();
+  renderPastWorkouts();
   renderGoalReminder();
   renderCoachInsight();
   renderHomeDashboard();
   renderWorkoutTodayPanel();
   renderHomeActivity();
+  renderVictoryShelf();
 }
 
 function renderLogType() {
@@ -290,6 +317,8 @@ function setWorkoutMode(mode) {
     section.hidden = !isActive;
   });
   if (mode === "log") selectBestWorkoutForToday();
+  if (mode === "past") renderPastWorkouts();
+  renderWorkoutReadiness();
 }
 
 function selectBestWorkoutForToday() {
@@ -311,6 +340,7 @@ function handleWorkoutRunnerClick(event) {
   if (action === "duplicate") duplicateSelectedWorkout();
   if (action === "delete") deleteSelectedWorkout();
   if (action === "favorite") toggleFavoriteWorkout();
+  if (action === "copy-summary") copySelectedWorkoutSummary();
   if (action === "complete") completeCurrentExercise();
   if (action === "fail") showFailForm();
   if (action === "save-fail") saveFailedExercise();
@@ -387,6 +417,46 @@ function applyWorkoutTemplate(templateName) {
         { exercise: "Squat", sets: "3", reps: "8", weight: "95 lb", rest: "2 min" },
         { exercise: "Romanian Deadlift", sets: "3", reps: "10", weight: "75 lb", rest: "90 sec" },
         { exercise: "Walking Lunge", sets: "2", reps: "12", weight: "Bodyweight", rest: "60 sec" },
+      ],
+    },
+    fullBody: {
+      name: "Full Body Starter",
+      days: ["Mon", "Wed", "Fri"],
+      exercises: [
+        { exercise: "Goblet Squat", sets: "3", reps: "10", weight: "Moderate", rest: "75 sec" },
+        { exercise: "Push Ups", sets: "3", reps: "8-12", weight: "Bodyweight", rest: "60 sec" },
+        { exercise: "Dumbbell Row", sets: "3", reps: "10 each", weight: "Moderate", rest: "75 sec" },
+        { exercise: "Plank", sets: "3", reps: "30 sec", weight: "Bodyweight", rest: "45 sec" },
+      ],
+    },
+    bodyweight: {
+      name: "No Equipment",
+      days: ["Tue", "Thu", "Sat"],
+      exercises: [
+        { exercise: "Air Squat", sets: "3", reps: "15", weight: "Bodyweight", rest: "45 sec" },
+        { exercise: "Push Ups", sets: "3", reps: "AMRAP", weight: "Bodyweight", rest: "60 sec" },
+        { exercise: "Reverse Lunge", sets: "3", reps: "10 each", weight: "Bodyweight", rest: "45 sec" },
+        { exercise: "Mountain Climbers", sets: "4", reps: "30 sec", weight: "Fast", rest: "30 sec" },
+      ],
+    },
+    basketball: {
+      name: "Basketball Performance",
+      days: ["Tue", "Fri"],
+      exercises: [
+        { exercise: "Dynamic Warmup", sets: "1", reps: "8 min", weight: "Mobility", rest: "0 sec" },
+        { exercise: "Defensive Slides", sets: "5", reps: "20 sec", weight: "Game speed", rest: "40 sec" },
+        { exercise: "Box Jump", sets: "4", reps: "5", weight: "Explosive", rest: "90 sec" },
+        { exercise: "Sprint", sets: "6", reps: "20 yd", weight: "Fast", rest: "60 sec" },
+      ],
+    },
+    mobility: {
+      name: "Mobility Reset",
+      days: ["Sun"],
+      exercises: [
+        { exercise: "Hip Flow", sets: "2", reps: "60 sec", weight: "Easy", rest: "15 sec" },
+        { exercise: "Thoracic Rotation", sets: "2", reps: "8 each", weight: "Easy", rest: "15 sec" },
+        { exercise: "Hamstring Stretch", sets: "2", reps: "45 sec", weight: "Easy", rest: "15 sec" },
+        { exercise: "Breathing Reset", sets: "1", reps: "2 min", weight: "Calm", rest: "0 sec" },
       ],
     },
     conditioning: {
@@ -508,6 +578,7 @@ function renderSavedWorkoutOptions(selectedId = savedWorkoutSelect?.value || "")
     savedWorkoutSelect.innerHTML = `<option value="">No workouts created yet</option>`;
     renderSavedWorkoutGrid([]);
     renderSelectedWorkout();
+    renderWorkoutReadiness();
     return;
   }
 
@@ -520,12 +591,19 @@ function renderSavedWorkoutOptions(selectedId = savedWorkoutSelect?.value || "")
   savedWorkoutSelect.value = selectedId;
   renderSavedWorkoutGrid(sortedWorkouts);
   renderSelectedWorkout();
+  renderWorkoutReadiness();
 }
 
 function renderSavedWorkoutGrid(workouts) {
   if (!savedWorkoutGrid) return;
   if (!workouts.length) {
-    savedWorkoutGrid.innerHTML = `<p class="empty-state">No saved workouts yet. Use a template or create your first one.</p>`;
+    savedWorkoutGrid.innerHTML = `
+      <div class="empty-action-card">
+        <strong>No saved workouts yet.</strong>
+        <span>Start with a simple template, then edit it however you want.</span>
+        <a href="workout.html#template-fullBody">Load Full Body Starter</a>
+      </div>
+    `;
     return;
   }
 
@@ -588,9 +666,42 @@ function renderSelectedWorkout() {
       <button type="button" data-workout-action="favorite">${workout.favorite ? "Unfavorite" : "Favorite"}</button>
       <button type="button" data-workout-action="edit">Edit</button>
       <button type="button" data-workout-action="duplicate">Duplicate</button>
+      <button type="button" data-workout-action="copy-summary">Copy Summary</button>
       <button class="delete-button" type="button" data-workout-action="delete">Delete</button>
     </div>
     <div id="workoutRunner" class="workout-runner"></div>
+  `;
+}
+
+function renderWorkoutReadiness() {
+  if (!workoutReadiness) return;
+  if (!createdWorkouts.length) {
+    workoutReadiness.innerHTML = `
+      <strong>No saved workouts yet</strong>
+      <span>Load a starter template first, then this will recommend the best session for today.</span>
+      <a href="workout.html#template-fullBody">Load Starter</a>
+    `;
+    return;
+  }
+
+  const todayScheduled = getScheduledWorkoutsForDate(new Date());
+  const favorite = createdWorkouts.find((workout) => workout.favorite);
+  const selected = getSelectedCreatedWorkout();
+  const pick = selected || todayScheduled[0] || favorite || createdWorkouts[0];
+  const stats = getWorkoutPlanStats(pick);
+  const completedToday = completedWorkouts.some((entry) => entry.date === toDateKey(new Date()));
+  const reason = completedToday
+    ? "Today is already checked. This is a good time to review or run a light bonus session."
+    : todayScheduled.some((workout) => workout.id === pick.id)
+      ? "This is on your schedule today."
+      : favorite?.id === pick.id
+        ? "No scheduled workout today, so your favorite is the best quick start."
+        : "This is the best available workout to keep momentum moving.";
+
+  workoutReadiness.innerHTML = `
+    <strong>${escapeHtml(pick.name)}</strong>
+    <span>${escapeHtml(reason)} ${stats.estimatedTime} · ${stats.totalSets} sets · last clear ${stats.lastCleared}.</span>
+    <button type="button" data-readiness-start="${pick.id}">Start Recommended</button>
   `;
 }
 
@@ -617,6 +728,82 @@ function renderSelectedWorkoutHistory(workout) {
         .join("")}
     </div>
   `;
+}
+
+function renderPastWorkouts() {
+  if (!pastWorkoutList) return;
+  if (!completedWorkouts.length) {
+    pastWorkoutList.innerHTML = `<p class="empty-state">No completed workouts yet. Finish one workout and it will show here automatically.</p>`;
+    return;
+  }
+
+  pastWorkoutList.innerHTML = [...completedWorkouts]
+    .sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0))
+    .map(renderPastWorkoutCard)
+    .join("");
+}
+
+function renderPastWorkoutCard(session) {
+  const xp = 100 + (Number(session.effort) || 0);
+  const notes = session.notes ? `<p class="past-notes">${escapeHtml(session.notes)}</p>` : "";
+  return `
+    <article class="past-workout-card">
+      <div class="past-workout-top">
+        <div>
+          <p class="eyebrow">${formatDateTime(session.completedAt)}</p>
+          <h3>${escapeHtml(session.workoutName || "Workout")}</h3>
+        </div>
+        <strong>+${xp} XP</strong>
+      </div>
+      <div class="mission-complete-stats">
+        <span>${formatDate(session.date)}</span>
+        <span>${formatSeconds(session.duration || 0)}</span>
+        <span>${Number(session.effort) || 0}/100 effort</span>
+      </div>
+      ${notes}
+      <div class="runner-results">${(session.results || []).map(formatWorkoutResult).join("")}</div>
+      <button class="text-button copy-session-button" type="button" data-copy-session="${session.id}">Copy Session Summary</button>
+    </article>
+  `;
+}
+
+async function handlePastWorkoutClick(event) {
+  const copyButton = event.target.closest("[data-copy-session]");
+  if (!copyButton) return;
+
+  const session = completedWorkouts.find((entry) => entry.id === copyButton.dataset.copySession);
+  if (!session) return;
+
+  await copySessionSummary(session);
+}
+
+async function copySessionSummary(session) {
+  const summary = [
+    `${session.workoutName || "Workout"} - ${formatDate(session.date)}`,
+    `Duration: ${formatSeconds(session.duration || 0)}`,
+    `Effort: ${Number(session.effort) || 0}/100`,
+    session.notes ? `Notes: ${session.notes}` : "",
+    ...(session.results || []).map((result, index) => `${index + 1}. ${result.exercise || "Exercise"} - ${result.status || "done"} - ${result.actual || result.planned || ""}`),
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(summary);
+    showToast("Session copied", "share ready", false);
+  } else {
+    showToast("Copy unavailable", "browser blocked clipboard", false);
+  }
+}
+
+async function handleHomeActivityClick(event) {
+  const copyButton = event.target.closest("[data-copy-activity]");
+  if (!copyButton) return;
+
+  const session = completedWorkouts.find((entry) => entry.id === copyButton.dataset.copyActivity);
+  if (!session) return;
+
+  await copySessionSummary(session);
 }
 
 function renderSessionComparison(latest, previous) {
@@ -805,6 +992,26 @@ function toggleFavoriteWorkout() {
   saveCreatedWorkouts();
   renderSavedWorkoutOptions(workout.id);
   showToast(workout.favorite ? "Favorited" : "Unfavorited", workout.name, false);
+}
+
+async function copySelectedWorkoutSummary() {
+  const workout = getSelectedCreatedWorkout();
+  if (!workout) return;
+
+  const stats = getWorkoutPlanStats(workout);
+  const lines = [
+    `${workout.name}`,
+    `${getWorkoutFocus(workout)} · ${stats.estimatedTime} · ${stats.totalSets} sets`,
+    ...workout.exercises.map((exercise, index) => `${index + 1}. ${exercise.exercise || "Exercise"} - ${exercise.sets || "-"} x ${exercise.reps || "-"} @ ${exercise.weight || "-"} · rest ${exercise.rest || "-"}`),
+  ];
+  const summary = lines.join("\n");
+
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(summary);
+    showToast("Summary copied", "ready to share", false);
+  } else {
+    showToast("Copy unavailable", "browser blocked clipboard", false);
+  }
 }
 
 function deleteSelectedWorkout() {
@@ -998,8 +1205,10 @@ function markWorkoutComplete() {
 function claimWorkoutSession() {
   if (!workoutSession || workoutSession.phase !== "review") return;
   markWorkoutComplete();
-  workoutSession.phase = "done";
-  renderWorkoutRunner();
+  stopWorkoutTimer();
+  workoutSession = null;
+  setWorkoutMode("past");
+  renderPastWorkouts();
   showToast("Workout finished", "+XP claimed", true);
   burstConfetti(50);
 }
@@ -1337,6 +1546,18 @@ function renderSummary() {
   xpFill.style.width = `${levelProgress}%`;
 }
 
+function renderHomeHero() {
+  if (!homeHeroTitle || !homeHeroSubtitle) return;
+  const name = profile.displayName || "";
+  const style = profile.trainingStyle || "";
+  const goal = profile.mainGoal || "";
+  const mission = "We help you log the work, feel encouraged, and push to the next level.";
+
+  homeHeroTitle.textContent = name ? `${name}'s training system.` : "Train with purpose.";
+  homeHeroSubtitle.textContent = [mission, style, goal].filter(Boolean).join(" · ");
+  homeHeroSubtitle.hidden = false;
+}
+
 function renderStarterPath() {
   if (!starterPath) return;
   const hasWorkout = createdWorkouts.length > 0;
@@ -1371,6 +1592,290 @@ function renderStarterPath() {
   `;
 }
 
+function renderPremiumCommandCenter() {
+  if (!premiumCommandCenter) return;
+
+  const today = new Date();
+  const todayKey = toDateKey(today);
+  const scheduled = getScheduledWorkoutsForDate(today);
+  const completedToday = completedWorkouts.some((entry) => entry.date === todayKey);
+  const latestSession = completedWorkouts
+    .slice()
+    .sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0))[0];
+  const style = profile.trainingStyle || "General fitness";
+  const streak = getWorkoutStreak();
+  const weeklyGoal = Number(goals.weeklyWorkoutGoal) || 7;
+  const weekDates = getCurrentWeekDates();
+  const weekDone = countCompleted(weekDates, getWorkoutDays());
+  const weekDateSet = new Set(weekDates);
+  const weekSessions = completedWorkouts.filter((session) => weekDateSet.has(session.date));
+  const avgEffort = weekSessions.length
+    ? Math.round(weekSessions.reduce((sum, session) => sum + (Number(session.effort) || 0), 0) / weekSessions.length)
+    : 0;
+  const weekVibe = weekDone >= weeklyGoal
+    ? "Goal cleared"
+    : avgEffort >= 85
+      ? "High effort week"
+      : weekDone
+        ? "Momentum building"
+        : "Fresh start";
+  const bestAction = completedToday
+    ? { href: "progression.html", label: "Review Progress", title: "Today is already checked." }
+    : scheduled.length
+      ? { href: "workout.html#log", label: "Start Scheduled", title: `${scheduled[0].name} is ready today.` }
+      : { href: getTemplateLinkForStyle(style), label: "Build Best Fit", title: `Recommended path: ${style}.` };
+
+  premiumCommandCenter.innerHTML = `
+    <div class="panel-header simple">
+      <h2>Command Center</h2>
+      <span>premium guidance</span>
+    </div>
+    <div class="premium-command-grid">
+      <article>
+        <strong>${escapeHtml(bestAction.title)}</strong>
+        <span>${completedToday ? "You can look at wins and next targets." : "One clean start is the main mission."}</span>
+        <a href="${bestAction.href}">${bestAction.label}</a>
+      </article>
+      <article>
+        <strong>${weekDone}/${weeklyGoal} weekly goal</strong>
+        <span>${weekDone >= weeklyGoal ? "Goal cleared. Bonus XP energy." : "Keep the meter moving without overthinking it."}</span>
+        <a href="goals.html">Adjust Goal</a>
+      </article>
+      <article>
+        <strong>${streak} day streak</strong>
+        <span>${latestSession ? `Last clear: ${escapeHtml(latestSession.workoutName)}.` : "Finish one workout to create history."}</span>
+        <a href="workout.html#past">Past Workouts</a>
+      </article>
+      <article>
+        <strong>${weekVibe}</strong>
+        <span>${weekSessions.length ? `${weekSessions.length} sessions · ${avgEffort}/100 avg effort.` : "Start the week with one clean session."}</span>
+        <a href="${weekDone >= weeklyGoal ? "shop.html" : "progression.html"}">${weekDone >= weeklyGoal ? "Claim Rewards" : "See Progress"}</a>
+      </article>
+    </div>
+  `;
+}
+
+function renderDailyUpgrade() {
+  if (!dailyUpgrade) return;
+  const todayKey = toDateKey(new Date());
+  const yesterdayKey = toDateKey(addDays(new Date(), -1));
+  const completedToday = completedWorkouts.some((entry) => entry.date === todayKey);
+  const yesterdaySession = completedWorkouts
+    .filter((entry) => entry.date === yesterdayKey)
+    .sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0))[0];
+  const latestSession = completedWorkouts
+    .slice()
+    .sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0))[0];
+  const scheduled = getScheduledWorkoutsForDate(new Date());
+  const style = profile.trainingStyle || "General fitness";
+
+  let title = "Your 1% upgrade";
+  let detail = "Pick one small action today. The goal is not perfect. The goal is forward.";
+  let action = { href: getTemplateLinkForStyle(style), label: "Load Starter" };
+
+  if (completedToday) {
+    title = "Lock in tomorrow";
+    detail = "You already earned the check today. Set up the next session so showing up is easier.";
+    action = { href: "goals.html", label: "Adjust Goal" };
+  } else if (scheduled.length) {
+    title = "Protect the plan";
+    detail = `${scheduled[0].name} is already scheduled. Complete it and keep the system alive.`;
+    action = { href: "workout.html#log", label: "Start Scheduled" };
+  } else if (yesterdaySession && Number(yesterdaySession.effort) >= 88) {
+    title = "Recover like a pro";
+    detail = "Yesterday was intense. A mobility reset or lighter session still counts as progress.";
+    action = { href: "workout.html#template-mobility", label: "Load Mobility" };
+  } else if (latestSession) {
+    title = "Beat one detail";
+    detail = `Last clear was ${latestSession.workoutName}. Add one cleaner rep, one better set, or one better note.`;
+    action = { href: "workout.html#log", label: "Train Again" };
+  }
+
+  dailyUpgrade.innerHTML = `
+    <div>
+      <p class="eyebrow">1% better</p>
+      <h2>${escapeHtml(title)}</h2>
+      <span>${escapeHtml(detail)}</span>
+    </div>
+    <a class="connected-action" href="${action.href}">${action.label}</a>
+  `;
+}
+
+function renderWeeklyReport() {
+  if (!weeklyReport) return;
+  const weekDates = getCurrentWeekDates();
+  const weekDateSet = new Set(weekDates);
+  const weekLogs = logs.filter((log) => weekDateSet.has(log.date));
+  const weekCardio = cardioEntries.filter((entry) => weekDateSet.has(entry.date));
+  const weekSessions = completedWorkouts.filter((session) => weekDateSet.has(session.date));
+  const weeklyGoal = Number(goals.weeklyWorkoutGoal) || 7;
+  const workoutDays = getWorkoutDays();
+  const weekDone = countCompleted(weekDates, workoutDays);
+  const weekVolume = weekLogs.reduce((sum, log) => sum + getVolume(log), 0);
+  const weekMiles = weekCardio.reduce((sum, entry) => sum + (Number(entry.miles) || 0), 0);
+  const avgEffort = weekSessions.length
+    ? Math.round(weekSessions.reduce((sum, session) => sum + (Number(session.effort) || 0), 0) / weekSessions.length)
+    : 0;
+  const bestSession = [...weekSessions].sort((a, b) => (Number(b.effort) || 0) - (Number(a.effort) || 0))[0];
+  const reportStatus = weekDone >= weeklyGoal ? "goal cleared" : weekDone ? "in progress" : "ready";
+  const nextMove = weekDone >= weeklyGoal
+    ? "Review Progression and keep the next session clean."
+    : weekSessions.length
+      ? "Complete one more workout to keep momentum moving."
+      : "Start with one short workout. The first check matters most.";
+
+  weeklyReport.innerHTML = `
+    <div class="panel-header simple">
+      <h2>Weekly Report</h2>
+      <span>${reportStatus}</span>
+    </div>
+    <div class="weekly-report-grid">
+      <article>
+        <strong>${weekDone}/${weeklyGoal}</strong>
+        <span>goal progress</span>
+      </article>
+      <article>
+        <strong>${formatNumber(weekVolume)}</strong>
+        <span>training volume</span>
+      </article>
+      <article>
+        <strong>${formatNumber(weekMiles)}</strong>
+        <span>cardio miles</span>
+      </article>
+      <article>
+        <strong>${avgEffort || "-"}</strong>
+        <span>avg effort</span>
+      </article>
+    </div>
+    <div class="weekly-report-note">
+      <strong>${bestSession ? `Best push: ${escapeHtml(bestSession.workoutName)}` : "Your week starts with the first clear."}</strong>
+      <span>${escapeHtml(nextMove)}</span>
+      <a href="${weekSessions.length ? "progression.html" : "workout.html#log"}">${weekSessions.length ? "Open Progression" : "Start Workout"}</a>
+    </div>
+  `;
+}
+
+function renderFirstWeekPlan() {
+  if (!firstWeekPlan) return;
+  const style = profile.trainingStyle || "General fitness";
+  const today = new Date();
+  const todayIndex = today.getDay();
+  const workoutsByDay = new Map();
+  createdWorkouts.forEach((workout) => {
+    (workout.repeatDays || []).forEach((day) => {
+      if (!workoutsByDay.has(day)) workoutsByDay.set(day, []);
+      workoutsByDay.get(day).push(workout);
+    });
+  });
+  const hasCreatedSchedule = [...workoutsByDay.values()].some((items) => items.length);
+  const plan = getGuidedPlanForStyle(style);
+
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day, index) => {
+    const scheduled = workoutsByDay.get(day) || [];
+    const fallback = plan[index] || { title: "Recovery", detail: "Walk, stretch, or rest.", template: "mobility" };
+    const item = hasCreatedSchedule && scheduled.length
+      ? { title: scheduled[0].name, detail: `${scheduled[0].exercises.length} exercises scheduled`, href: "workout.html#log" }
+      : { title: fallback.title, detail: fallback.detail, href: `workout.html#template-${fallback.template}` };
+    return { day, isToday: index === todayIndex, ...item };
+  });
+
+  firstWeekPlan.innerHTML = `
+    <div class="panel-header simple">
+      <h2>First Week Plan</h2>
+      <span>${hasCreatedSchedule ? "from your schedule" : `${style} starter`}</span>
+    </div>
+    <div class="first-week-grid">
+      ${days
+        .map((day) => `
+          <a class="${day.isToday ? "today" : ""}" href="${day.href}">
+            <small>${day.day}${day.isToday ? " · today" : ""}</small>
+            <strong>${escapeHtml(day.title)}</strong>
+            <span>${escapeHtml(day.detail)}</span>
+          </a>
+        `)
+        .join("")}
+    </div>
+  `;
+}
+
+function getGuidedPlanForStyle(style = "General fitness") {
+  const plans = {
+    Strength: [
+      { title: "Recovery", detail: "Keep joints fresh.", template: "mobility" },
+      { title: "Push Day", detail: "Pressing strength and upper body.", template: "push" },
+      { title: "Pull Day", detail: "Back and arm strength.", template: "pull" },
+      { title: "Leg Day", detail: "Lower-body power.", template: "legs" },
+      { title: "Recovery", detail: "Walk or mobility reset.", template: "mobility" },
+      { title: "Push Day", detail: "Repeat and improve one detail.", template: "push" },
+      { title: "Leg Day", detail: "Controlled reps, clean finish.", template: "legs" },
+    ],
+    Basketball: [
+      { title: "Mobility Reset", detail: "Open hips and ankles.", template: "mobility" },
+      { title: "Basketball Performance", detail: "Speed, bounce, and conditioning.", template: "basketball" },
+      { title: "Recovery", detail: "Light skill work or rest.", template: "mobility" },
+      { title: "Full Body Starter", detail: "Strength base for durability.", template: "fullBody" },
+      { title: "Basketball Performance", detail: "Game-speed movement.", template: "basketball" },
+      { title: "Conditioning Day", detail: "Build lungs and finish strong.", template: "conditioning" },
+      { title: "Recovery", detail: "Stretch and reset.", template: "mobility" },
+    ],
+    Bodybuilding: [
+      { title: "Recovery", detail: "Prep for volume.", template: "mobility" },
+      { title: "Push Day", detail: "Chest, shoulders, triceps.", template: "push" },
+      { title: "Pull Day", detail: "Back and biceps.", template: "pull" },
+      { title: "Leg Day", detail: "Quads, hamstrings, glutes.", template: "legs" },
+      { title: "Recovery", detail: "Walk and mobility.", template: "mobility" },
+      { title: "Push Day", detail: "Add clean volume.", template: "push" },
+      { title: "Pull Day", detail: "Control every rep.", template: "pull" },
+    ],
+    Conditioning: [
+      { title: "Mobility Reset", detail: "Prepare your body.", template: "mobility" },
+      { title: "Conditioning Day", detail: "Engine work.", template: "conditioning" },
+      { title: "No Equipment", detail: "Bodyweight sweat session.", template: "bodyweight" },
+      { title: "Recovery", detail: "Easy movement.", template: "mobility" },
+      { title: "Conditioning Day", detail: "Repeat with better pacing.", template: "conditioning" },
+      { title: "Full Body Starter", detail: "Strength support.", template: "fullBody" },
+      { title: "Recovery", detail: "Reset and breathe.", template: "mobility" },
+    ],
+    "Weight loss": [
+      { title: "Mobility Reset", detail: "Low-friction first win.", template: "mobility" },
+      { title: "No Equipment", detail: "Simple full-body movement.", template: "bodyweight" },
+      { title: "Conditioning Day", detail: "Steady cardio work.", template: "conditioning" },
+      { title: "Recovery", detail: "Walk or stretch.", template: "mobility" },
+      { title: "No Equipment", detail: "Build consistency.", template: "bodyweight" },
+      { title: "Full Body Starter", detail: "Strength plus confidence.", template: "fullBody" },
+      { title: "Recovery", detail: "Keep the habit alive.", template: "mobility" },
+    ],
+    Mobility: [
+      { title: "Mobility Reset", detail: "Reset and breathe.", template: "mobility" },
+      { title: "Mobility Reset", detail: "Hips, spine, hamstrings.", template: "mobility" },
+      { title: "Recovery", detail: "Easy walk.", template: "mobility" },
+      { title: "No Equipment", detail: "Light strength support.", template: "bodyweight" },
+      { title: "Mobility Reset", detail: "Move smoother.", template: "mobility" },
+      { title: "Full Body Starter", detail: "Controlled basics.", template: "fullBody" },
+      { title: "Recovery", detail: "Protect the streak.", template: "mobility" },
+    ],
+    "No equipment": [
+      { title: "Recovery", detail: "Easy start.", template: "mobility" },
+      { title: "No Equipment", detail: "Bodyweight strength.", template: "bodyweight" },
+      { title: "Conditioning Day", detail: "Sweat and stamina.", template: "conditioning" },
+      { title: "Recovery", detail: "Stretch and walk.", template: "mobility" },
+      { title: "No Equipment", detail: "Beat your reps.", template: "bodyweight" },
+      { title: "No Equipment", detail: "Strong finish.", template: "bodyweight" },
+      { title: "Mobility Reset", detail: "Recover well.", template: "mobility" },
+    ],
+    "General fitness": [
+      { title: "Recovery", detail: "Walk, stretch, or reset.", template: "mobility" },
+      { title: "Full Body Starter", detail: "Simple strength base.", template: "fullBody" },
+      { title: "Conditioning Day", detail: "Build your engine.", template: "conditioning" },
+      { title: "Recovery", detail: "Stay loose.", template: "mobility" },
+      { title: "Full Body Starter", detail: "Repeat and improve.", template: "fullBody" },
+      { title: "No Equipment", detail: "Easy extra win.", template: "bodyweight" },
+      { title: "Mobility Reset", detail: "Finish the week fresh.", template: "mobility" },
+    ],
+  };
+  return plans[style] || plans["General fitness"];
+}
+
 function renderHomeDashboard() {
   if (!todayMissionList || !homeQuestText || !homeQuestFill || !homeNextAction || !homeMissionStatus) return;
 
@@ -1398,6 +1903,42 @@ function renderHomeDashboard() {
   todayMissionList.innerHTML = missionWorkouts.length
     ? missionWorkouts.map((workout) => renderMissionItem(workout, completedToday.some((entry) => entry.workoutId === workout.id))).join("")
     : `<article class="mission-item"><strong>Free Training Day</strong><span>Run any saved workout or create a new one.</span></article>`;
+}
+
+function handleInitialWorkoutHash() {
+  const hash = window.location.hash.replace("#", "");
+  if (!hash) return;
+
+  if (hash === "log") {
+    setWorkoutMode("log");
+    selectBestWorkoutForToday();
+    return;
+  }
+
+  if (hash === "past") {
+    setWorkoutMode("past");
+    return;
+  }
+
+  if (hash.startsWith("template-")) {
+    const templateName = hash.replace("template-", "");
+    setWorkoutMode("create");
+    applyWorkoutTemplate(templateName);
+  }
+}
+
+function getTemplateLinkForStyle(style = "General fitness") {
+  const templateByStyle = {
+    Strength: "push",
+    Basketball: "basketball",
+    Bodybuilding: "push",
+    Conditioning: "conditioning",
+    "Weight loss": "bodyweight",
+    Mobility: "mobility",
+    "No equipment": "bodyweight",
+    "General fitness": "fullBody",
+  };
+  return `workout.html#template-${templateByStyle[style] || "fullBody"}`;
 }
 
 function renderCoachInsight() {
@@ -1519,6 +2060,34 @@ function renderHomeActivity() {
     : `<p class="empty-state">Finish a workout and your recent sessions will show here.</p>`;
 }
 
+function renderVictoryShelf() {
+  if (!victoryShelf) return;
+  const biggestVolume = [...logs].sort((a, b) => getVolume(b) - getVolume(a))[0];
+  const topMax = [...maxEntries].sort((a, b) => Number(b.value) - Number(a.value))[0];
+  const longestCardio = [...cardioEntries].sort((a, b) => (Number(b.miles) || 0) - (Number(a.miles) || 0))[0];
+  const latestSession = [...completedWorkouts].sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0))[0];
+  const wins = [
+    latestSession ? { title: "Latest Clear", detail: `${latestSession.workoutName} · ${Number(latestSession.effort) || 0}/100 effort`, href: "workout.html#past" } : null,
+    biggestVolume ? { title: "Best Volume", detail: `${biggestVolume.exercise} · ${formatNumber(getVolume(biggestVolume))}`, href: "progression.html" } : null,
+    topMax ? { title: "Top Max", detail: `${topMax.movement} · ${formatNumber(topMax.value)} ${topMax.unit}`, href: "progression.html" } : null,
+    longestCardio ? { title: "Longest Cardio", detail: `${formatNumber(longestCardio.miles)} miles · ${formatDate(longestCardio.date)}`, href: "progression.html" } : null,
+  ].filter(Boolean);
+
+  victoryShelf.innerHTML = `
+    <div class="panel-header simple">
+      <h2>Victory Shelf</h2>
+      <span>${wins.length ? "wins worth seeing" : "waiting for your first win"}</span>
+    </div>
+    <div class="victory-shelf-grid">
+      ${
+        wins.length
+          ? wins.map((win) => `<a href="${win.href}"><strong>${escapeHtml(win.title)}</strong><span>${escapeHtml(win.detail)}</span></a>`).join("")
+          : `<article><strong>No wins yet</strong><span>Complete a workout, log cardio, or save a max to start building the shelf.</span></article>`
+      }
+    </div>
+  `;
+}
+
 function renderActivityItem(session) {
   const resultCount = session.results?.length || 0;
   return `
@@ -1528,7 +2097,11 @@ function renderActivityItem(session) {
         <span>${formatDate(session.date)} · ${resultCount} exercises · ${formatSeconds(session.duration || 0)} · ${session.effort || 0}/100 effort</span>
         ${session.notes ? `<span>${escapeHtml(session.notes)}</span>` : ""}
       </div>
-      <em>+${100 + (Number(session.effort) || 0)} XP</em>
+      <div class="activity-actions">
+        <em>+${100 + (Number(session.effort) || 0)} XP</em>
+        <button class="text-button" type="button" data-copy-activity="${session.id}">Copy</button>
+        <a href="workout.html#past">View</a>
+      </div>
     </article>
   `;
 }
@@ -1556,6 +2129,7 @@ function renderCalendar() {
     month: "long",
     year: "numeric",
   });
+  renderMonthSummary(year, month, daysInMonth);
 
   calendar.innerHTML = "";
 
@@ -1621,6 +2195,24 @@ function renderCalendar() {
     empty.className = "day empty";
     calendar.append(empty);
   }
+}
+
+function renderMonthSummary(year, month, daysInMonth) {
+  if (!monthSummary) return;
+  const monthDates = Array.from({ length: daysInMonth }, (_, index) => toDateKey(new Date(year, month, index + 1)));
+  const monthSet = new Set(monthDates);
+  const monthCompleted = completedWorkouts.filter((entry) => monthSet.has(entry.date));
+  const monthLogs = logs.filter((entry) => monthSet.has(entry.date));
+  const monthCardio = cardioEntries.filter((entry) => monthSet.has(entry.date));
+  const monthMaxes = maxEntries.filter((entry) => monthSet.has(entry.date));
+  const activeDays = new Set([...monthCompleted.map((entry) => entry.date), ...monthLogs.map((entry) => entry.date), ...monthCardio.map((entry) => entry.date)]).size;
+
+  monthSummary.innerHTML = `
+    <article><strong>${activeDays}</strong><span>active days</span></article>
+    <article><strong>${monthCompleted.length}</strong><span>completed workouts</span></article>
+    <article><strong>${formatNumber(monthCardio.reduce((sum, entry) => sum + (Number(entry.miles) || 0), 0))}</strong><span>cardio miles</span></article>
+    <article><strong>${monthMaxes.length}</strong><span>maxes logged</span></article>
+  `;
 }
 
 function openDayDetails(dateKey) {
@@ -2118,6 +2710,14 @@ function loadGoals() {
   }
 }
 
+function loadProfile() {
+  try {
+    return JSON.parse(localStorage.getItem(PROFILE_STORAGE_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+
 function loadCreatedWorkouts() {
   try {
     return JSON.parse(localStorage.getItem(CREATED_WORKOUTS_STORAGE_KEY)) || [];
@@ -2195,6 +2795,16 @@ function formatDate(dateKey) {
     month: "short",
     day: "numeric",
     year: "numeric",
+  });
+}
+
+function formatDateTime(timestamp) {
+  const date = timestamp ? new Date(timestamp) : new Date();
+  return date.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
   });
 }
 

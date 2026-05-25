@@ -3,8 +3,19 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#2f80ff" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Workout XP" />
     <title>Workout | Overload Fitness Tracker</title>
-    <link rel="stylesheet" href="styles.css?v=app-polish-16" />
+    <meta name="description" content="A premium workout tracker for training plans, workout logging, goals, rewards, and performance progress." />
+    <meta property="og:title" content="Workout | Overload Fitness Tracker" />
+    <meta property="og:description" content="A premium workout tracker for training plans, workout logging, goals, rewards, and performance progress." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://andrewsworkouttracker.netlify.app/" />
+    <meta property="og:image" content="https://andrewsworkouttracker.netlify.app/app-icon.svg" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="app-icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css?v=app-polish-46" />
   </head>
   <body>
     <main class="app-shell">
@@ -14,12 +25,13 @@
         <a class="nav-link" href="goals.html">Set Goals</a>
         <a class="nav-link" href="shop.html">Shop</a>
         <a class="nav-link" href="progression.html">Progression</a>
+        <a class="nav-link" href="profile.html">Profile</a>
       </nav>
 
       <section class="hero workout-hero">
         <div>
-          <p class="eyebrow">Workout station</p>
-          <h1>Log the work. Claim the XP.</h1>
+          <p class="eyebrow">Training console</p>
+          <h1>Build the session. Finish strong.</h1>
         </div>
         <div class="scoreboard" aria-label="Training summary">
           <div class="streak-card">
@@ -51,6 +63,7 @@
       <section class="workout-mode-panel" aria-label="Workout options">
         <button class="workout-mode-button active" type="button" data-workout-mode-button="create">Create Workout</button>
         <button class="workout-mode-button" type="button" data-workout-mode-button="log">Log Workout</button>
+        <button class="workout-mode-button" type="button" data-workout-mode-button="past">Past Workouts</button>
       </section>
 
       <section class="panel workout-command-panel">
@@ -77,7 +90,30 @@
               <button type="button" data-workout-template="push">Push</button>
               <button type="button" data-workout-template="pull">Pull</button>
               <button type="button" data-workout-template="legs">Legs</button>
+              <button type="button" data-workout-template="fullBody">Full Body</button>
+              <button type="button" data-workout-template="bodyweight">Bodyweight</button>
+              <button type="button" data-workout-template="basketball">Basketball</button>
+              <button type="button" data-workout-template="mobility">Mobility</button>
               <button type="button" data-workout-template="conditioning">Conditioning</button>
+            </section>
+
+            <section class="template-guide" aria-label="Recommended training paths">
+              <a href="#template-fullBody">
+                <strong>Full Body Foundation</strong>
+                <span>Best first plan for general strength and consistency.</span>
+              </a>
+              <a href="#template-basketball">
+                <strong>Basketball Performance</strong>
+                <span>Speed, bounce, conditioning, and lower-body power.</span>
+              </a>
+              <a href="#template-bodyweight">
+                <strong>No Equipment</strong>
+                <span>Simple bodyweight training when you want no excuses.</span>
+              </a>
+              <a href="#template-mobility">
+                <strong>Mobility Reset</strong>
+                <span>Recovery, flexibility, and streak protection.</span>
+              </a>
             </section>
 
             <div class="builder-header">
@@ -114,6 +150,7 @@
             <h2>Available Workouts</h2>
             <span>pick one to log</span>
           </div>
+          <div id="workoutReadiness" class="workout-readiness"></div>
           <label>
             Select workout
             <select id="savedWorkoutSelect">
@@ -126,8 +163,19 @@
           </div>
         </section>
       </section>
+
+      <section class="log-layout workout-mode-section" data-workout-mode="past" aria-label="Past workouts">
+        <section class="panel saved-workout-picker">
+          <div class="panel-header simple">
+            <h2>Past Workouts</h2>
+            <span>completed sessions</span>
+          </div>
+          <div id="pastWorkoutList" class="past-workout-list"></div>
+        </section>
+      </section>
     </main>
 
-    <script src="script.js?v=app-polish-16"></script>
+    <script src="script.js?v=app-polish-46"></script>
+    <script src="pwa.js?v=app-polish-46"></script>
   </body>
 </html>

@@ -1,0 +1,33 @@
+{
+  "name": "Andrew's Workout Tracker",
+  "short_name": "Workout XP",
+  "description": "A game-style workout tracker for logging training, goals, XP, rewards, and progression.",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#06162f",
+  "theme_color": "#2f80ff",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Start Workout",
+      "short_name": "Workout",
+      "url": "/workout.html#log",
+      "description": "Jump straight into logging a workout."
+    },
+    {
+      "name": "Spend XP",
+      "short_name": "Shop",
+      "url": "/shop.html",
+      "description": "Open the reward shop."
+    }
+  ]
+}

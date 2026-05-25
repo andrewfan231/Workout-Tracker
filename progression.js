@@ -2,6 +2,7 @@ const WORKOUT_STORAGE_KEY = "overload-fitness-tracker";
 const MAX_STORAGE_KEY = "overload-fitness-max-log";
 const CARDIO_STORAGE_KEY = "overload-fitness-cardio-log";
 const COMPLETED_WORKOUTS_STORAGE_KEY = "overload-fitness-completed-workouts";
+const BODY_METRICS_STORAGE_KEY = "overload-fitness-body-metrics";
 
 const progressSummary = document.querySelector("#progressSummary");
 const personalBestList = document.querySelector("#personalBestList");
@@ -11,6 +12,8 @@ const muscleBalance = document.querySelector("#muscleBalance");
 const recentSessionList = document.querySelector("#recentSessionList");
 const trainingReadiness = document.querySelector("#trainingReadiness");
 const readinessLabel = document.querySelector("#readinessLabel");
+const progressCoach = document.querySelector("#progressCoach");
+const progressCoachStatus = document.querySelector("#progressCoachStatus");
 const repsExerciseSelect = document.querySelector("#repsExerciseSelect");
 const maxMovementSelect = document.querySelector("#maxMovementSelect");
 const repsChart = document.querySelector("#repsChart");
@@ -23,16 +26,20 @@ const volumeChart = document.querySelector("#volumeChart");
 const volumeEmpty = document.querySelector("#volumeEmpty");
 const effortChart = document.querySelector("#effortChart");
 const effortEmpty = document.querySelector("#effortEmpty");
+const bodyChart = document.querySelector("#bodyChart");
+const bodyEmpty = document.querySelector("#bodyEmpty");
 
 const logs = load(WORKOUT_STORAGE_KEY, []);
 const maxEntries = load(MAX_STORAGE_KEY, []);
 const cardioEntries = load(CARDIO_STORAGE_KEY, []);
 const completedWorkouts = load(COMPLETED_WORKOUTS_STORAGE_KEY, []);
+const bodyMetrics = load(BODY_METRICS_STORAGE_KEY, []);
 
 setupSelect(repsExerciseSelect, uniqueValues(logs, "exercise"));
 setupSelect(maxMovementSelect, uniqueValues(maxEntries, "movement"));
 renderSummaryCards();
 renderTrainingReadiness();
+renderProgressCoach();
 renderPersonalBests();
 renderNextTargets();
 renderConsistencyMap();
@@ -43,6 +50,7 @@ renderRepsChart();
 renderMaxChart();
 renderCardioChart();
 renderWeeklyVolumeChart();
+renderBodyChart();
 
 repsExerciseSelect.addEventListener("change", renderRepsChart);
 maxMovementSelect.addEventListener("change", renderMaxChart);
@@ -54,12 +62,14 @@ function renderSummaryCards() {
   const totalTime = completedWorkouts.reduce((sum, session) => sum + (Number(session.duration) || 0), 0);
   const workoutDays = getWorkoutDays();
   const currentStreak = getStreak(workoutDays);
+  const latestBodyweight = [...bodyMetrics].sort((a, b) => b.date.localeCompare(a.date) || (b.createdAt || 0) - (a.createdAt || 0))[0];
 
   progressSummary.innerHTML = [
     { label: "Current streak", value: `${currentStreak} days`, note: "completed workouts" },
     { label: "Total volume", value: formatNumber(totalVolume), note: "sets x reps x weight" },
     { label: "Training time", value: formatDuration(totalTime), note: "completed sessions" },
     { label: "Cardio miles", value: formatNumber(totalMiles), note: "conditioning work" },
+    { label: "Bodyweight", value: latestBodyweight?.weight || "-", note: "latest check-in" },
   ]
     .map((card) => {
       return `
@@ -113,6 +123,67 @@ function renderTrainingReadiness() {
   `;
 }
 
+function renderProgressCoach() {
+  if (!progressCoach || !progressCoachStatus) return;
+  const currentWeekStart = startOfWeek(new Date());
+  const previousWeekStart = addDays(currentWeekStart, -7);
+  const currentWeekLogs = logs.filter((log) => {
+    const date = parseDateKey(log.date);
+    return date >= currentWeekStart;
+  });
+  const previousWeekLogs = logs.filter((log) => {
+    const date = parseDateKey(log.date);
+    return date >= previousWeekStart && date < currentWeekStart;
+  });
+  const currentVolume = currentWeekLogs.reduce((sum, log) => sum + getVolume(log), 0);
+  const previousVolume = previousWeekLogs.reduce((sum, log) => sum + getVolume(log), 0);
+  const volumeDiff = currentVolume - previousVolume;
+  const currentSessions = completedWorkouts.filter((session) => parseDateKey(session.date) >= currentWeekStart);
+  const previousSessions = completedWorkouts.filter((session) => {
+    const date = parseDateKey(session.date);
+    return date >= previousWeekStart && date < currentWeekStart;
+  });
+  const avgEffort = currentSessions.length
+    ? Math.round(currentSessions.reduce((sum, session) => sum + (Number(session.effort) || 0), 0) / currentSessions.length)
+    : 0;
+
+  let status = "build base";
+  let title = "Set the baseline";
+  let detail = "Log a few workouts this week and the app will start comparing your training trend.";
+  let action = { href: "workout.html#log", label: "Log Workout" };
+
+  if (currentSessions.length || currentWeekLogs.length) {
+    if (previousVolume && volumeDiff > 0) {
+      status = "trending up";
+      title = `Volume is up ${formatNumber(volumeDiff)}`;
+      detail = avgEffort >= 88
+        ? "You are pushing hard and volume is rising. Keep the next session clean, not reckless."
+        : "Good trend. Add progress slowly so the streak stays sustainable.";
+      action = { href: "workout.html#log", label: "Train Next" };
+    } else if (previousVolume && volumeDiff < 0) {
+      status = "rebuild";
+      title = `Volume is down ${formatNumber(Math.abs(volumeDiff))}`;
+      detail = "Not a failure. Make the next workout simple and finish it. Momentum first.";
+      action = { href: "workout.html#log", label: "Rebuild Momentum" };
+    } else {
+      status = "baseline set";
+      title = `${currentSessions.length || currentWeekLogs.length} training touch${(currentSessions.length || currentWeekLogs.length) === 1 ? "" : "es"} this week`;
+      detail = "You have a real baseline now. Next week, beat one small detail.";
+      action = { href: "workout.html#past", label: "Review Sessions" };
+    }
+  }
+
+  progressCoachStatus.textContent = status;
+  progressCoach.innerHTML = `
+    <div>
+      <strong>${escapeHtml(title)}</strong>
+      <span>${escapeHtml(detail)}</span>
+      <small>${previousSessions.length ? `${previousSessions.length} sessions last week` : "No full prior week yet"} · ${currentSessions.length} sessions this week</small>
+    </div>
+    <a class="connected-action" href="${action.href}">${action.label}</a>
+  `;
+}
+
 function renderRecentSessions() {
   if (!recentSessionList) return;
   const sessions = completedWorkouts
@@ -124,10 +195,12 @@ function renderRecentSessions() {
     ? sessions
         .map((session) => {
           const resultCount = session.results?.length || 0;
-          return renderProgressCard({
-            title: session.workoutName,
-            meta: `${shortDate(session.date)} · ${resultCount} exercises · ${formatDuration(session.duration || 0)}`,
-          });
+          return `
+            <a class="progress-mini-card progress-link-card" href="workout.html#past">
+              <strong>${escapeHtml(session.workoutName)}</strong>
+              <span>${shortDate(session.date)} · ${resultCount} exercises · ${formatDuration(session.duration || 0)} · View details</span>
+            </a>
+          `;
         })
         .join("")
     : `<p class="empty-state">Complete a workout and your sessions will show here.</p>`;
@@ -146,6 +219,22 @@ function renderEffortChart() {
   drawLineChart(effortChart, points, "effort");
   effortEmpty.hidden = points.length > 0;
   effortChart.hidden = points.length === 0;
+}
+
+function renderBodyChart() {
+  if (!bodyChart || !bodyEmpty) return;
+  const points = bodyMetrics
+    .map((entry) => ({
+      date: entry.date,
+      label: shortDate(entry.date),
+      value: parsePositiveNumber(entry.weight),
+    }))
+    .filter((point) => Number(point.value))
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  drawLineChart(bodyChart, points, "bodyweight");
+  bodyEmpty.hidden = points.length > 0;
+  bodyChart.hidden = points.length === 0;
 }
 
 function renderPersonalBests() {
@@ -484,6 +573,11 @@ function weekKey(dateKey) {
 
 function formatNumber(value) {
   return Number(value || 0).toLocaleString(undefined, { maximumFractionDigits: 1 });
+}
+
+function parsePositiveNumber(value) {
+  const match = String(value ?? "").match(/\d+(\.\d+)?/);
+  return match ? Number(match[0]) : 0;
 }
 
 function formatDuration(totalSeconds) {

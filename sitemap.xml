@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://andrewsworkouttracker.netlify.app/</loc>
+  </url>
+  <url>
+    <loc>https://andrewsworkouttracker.netlify.app/workout.html</loc>
+  </url>
+  <url>
+    <loc>https://andrewsworkouttracker.netlify.app/goals.html</loc>
+  </url>
+  <url>
+    <loc>https://andrewsworkouttracker.netlify.app/shop.html</loc>
+  </url>
+  <url>
+    <loc>https://andrewsworkouttracker.netlify.app/progression.html</loc>
+  </url>
+  <url>
+    <loc>https://andrewsworkouttracker.netlify.app/profile.html</loc>
+  </url>
+</urlset>

@@ -3,8 +3,19 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#2f80ff" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Workout XP" />
     <title>Set Goals</title>
-    <link rel="stylesheet" href="styles.css?v=app-polish-16" />
+    <meta name="description" content="A premium workout tracker for setting goals, tracking consistency, earning rewards, and improving performance." />
+    <meta property="og:title" content="Set Goals" />
+    <meta property="og:description" content="A premium workout tracker for setting goals, tracking consistency, earning rewards, and improving performance." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://andrewsworkouttracker.netlify.app/" />
+    <meta property="og:image" content="https://andrewsworkouttracker.netlify.app/app-icon.svg" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="app-icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css?v=app-polish-46" />
   </head>
   <body>
     <main class="app-shell">
@@ -14,12 +25,13 @@
         <a class="nav-link active" href="goals.html">Set Goals</a>
         <a class="nav-link" href="shop.html">Shop</a>
         <a class="nav-link" href="progression.html">Progression</a>
+        <a class="nav-link" href="profile.html">Profile</a>
       </nav>
 
       <section class="shop-hero">
         <div>
-          <p class="eyebrow">Set goals</p>
-          <h1>Choose your targets.</h1>
+          <p class="eyebrow">Mission control</p>
+          <h1>Set targets that pull you forward.</h1>
         </div>
       </section>
 
@@ -29,6 +41,14 @@
           <h2>Saved goals show up as reminders on the Home page.</h2>
         </div>
         <a class="connected-action" href="index.html">View Home</a>
+      </section>
+
+      <section class="panel goal-coach-panel">
+        <div class="panel-header simple">
+          <h2>Goal Coach</h2>
+          <span id="goalCoachStatus">checking</span>
+        </div>
+        <div id="goalCoach" class="goal-coach"></div>
       </section>
 
       <section class="panel goals-panel">
@@ -207,6 +227,7 @@
         <textarea id="backupBox" rows="8" readonly placeholder="Your exported backup will appear here."></textarea>
       </section>
     </main>
-    <script src="goals.js?v=app-polish-16"></script>
+    <script src="goals.js?v=app-polish-46"></script>
+    <script src="pwa.js?v=app-polish-46"></script>
   </body>
 </html>
